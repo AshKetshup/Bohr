@@ -1,13 +1,21 @@
-CC = g++
-CPPFLAGS = -Wall -O2
+CC := gcc
+CXX := g++
 
-ifneq ($(OS), 'Windows_NT')
-    CPPFLAGS += -D_POSIX_C_SOURCE
-endif
 
-LIBS := -lpthread -lm
-LDFLAGS :=
+# GLFW e GLAD
+glfw := #Caminho para o GLFW
+glfw_inc := $(glfw)/include
+glfw_lib := $(glfw)/lib64
+
+glad := #Caminho para o GLAD
+glad_inc := $(glad)/include
+
+
+INCS := -I$(glfw_inc) -I$(glad_inc)
+LIBS :=  -L$(glfw_lib) 
+LDFLAGS := $(LIBS) -lglfw3 -lopengl32 -lglu32 -lgdi32
 SANITIZERFLAGS := -fsanitize=address -fsanitize=undefined
+
 
 SRCDIR := src
 OBJDIR := obj
@@ -17,6 +25,7 @@ MODDIR := models
 DEPDIR := deps
 
 TARGET := structur
+
 
 SOURCES := $(wildcard $(SRCDIR)/*.cpp)
 OBJECTS := $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SOURCES))
@@ -46,3 +55,5 @@ clean:
 .PHONY: debug release clean
 
 -include $(patsubst $(SRCDIR)/%.cpp, $(DEPDIR)/%.d, $(SOURCES))
+
+

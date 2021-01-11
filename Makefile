@@ -6,7 +6,7 @@ ifneq ($(OS), 'Windows_NT')
     CFLAGS += -D_POSIX_C_SOURCE
 endif
 
-LIBS := -lGL -lGLU -lGLEW -lglfw3 -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl -lXinerama -lXcursor
+LIBS := -lGL -lGLU -lGLEW `pkg-config --libs glfw3` -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl -lXinerama -lXcursor
 LDFLAGS :=
 SANITIZERFLAGS := -fsanitize=address -fsanitize=undefined
 

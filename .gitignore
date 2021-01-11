@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+# Others
+bin/
+.vscode/
+doc/ignore/
+deps/
+*.curr
+tags

@@ -40,6 +40,44 @@ float lastFrame = 0.0f;
 
 
 int main(int argc, char const *argv[]) {
+    GLFWwindow* window = initialize_glfw(SCR_WIDTH, SCR_HEIGHT, "BOHR - Very Small PDB Molecular Visualizer");
+    if (window == NULL) {
+        std::cout << "Failed to create the window" << std::endl;
+        glfwTerminate();
+        return -1;
+    }
+
+    if (!initialize_glad()) {
+        std::cout << "Failed to initialize GLAD" << std::endl;
+        return -2;
+    }
+
+    glEnable(GL_DEPTH_TEST);
+
+    Shader lightingShader = Shader("shaders/lighting_vs.glsl", "shaders/lighting_fs.glsl");
+    Shader lampShader = Shader("shaders/lamp_vs.glsl", "shaders/lamp_fs.glsl");
+
+
+    float currentFrame;
+
+    while (!glfwWindowShouldClose(window)) {
+        currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
+
+        processInput(window);
+
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+    
+
+
+    glfwTerminate();
     
     return 0;
 }

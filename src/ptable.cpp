@@ -1,5 +1,7 @@
 #include "ptable.h"
 
+constexpr PeriodicTable::Element PeriodicTable::PERIODIC_TABLE[NUM_ELEMENTS];
+
 int PeriodicTable::getNumberFromSymbol(string symbol) {
     for (auto elem : PeriodicTable::PERIODIC_TABLE) {
         if (symbol.compare(elem.symbol) == 0)

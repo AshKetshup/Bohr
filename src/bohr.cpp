@@ -14,6 +14,10 @@
 #include <GLFW/glfw3.h>
 #include "shader_m.h"
 #include "camera.h"
+#include "pdbreader.hpp"
+#include "debug.h"
+
+using namespace std;
 
 GLFWwindow* initialize_glfw(int width, int height, const char* title);
 int initialize_glad(void);
@@ -29,10 +33,10 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 /* Camera */
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
-bool firstMouse = true;
+bool  firstMouse = true;
 
 /* Timing */
 float deltaTime = 0.0f;
@@ -49,33 +53,39 @@ int main(int argc, char const *argv[]) {
 
     if (!initialize_glad()) {
         std::cout << "Failed to initialize GLAD" << std::endl;
+        glfwTerminate();
         return -2;
     }
 
     glEnable(GL_DEPTH_TEST);
 
+    debug("Loading shaders...\n");
     Shader lightingShader = Shader("shaders/lighting_vs.glsl", "shaders/lighting_fs.glsl");
-    Shader lampShader = Shader("shaders/lamp_vs.glsl", "shaders/lamp_fs.glsl");
+    // Shader lampShader = Shader("shaders/lamp_vs.glsl", "shaders/lamp_fs.glsl");
 
+    debug("Reading molecule...\n");
+    Molecule molecule = Molecule().fromPDB("pdb/gabj-chainA-model.pdb");
+    cout << molecule.toString() << endl;
+
+    camera = molecule.resetCamera();
 
     float currentFrame;
-
     while (!glfwWindowShouldClose(window)) {
         currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-
 
         processInput(window);
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        debug("Rendering at %.3f\n", currentFrame);
+        molecule.render_vanderWalls(lightingShader, camera, SCR_WIDTH, SCR_HEIGHT);
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-    
-
 
     glfwTerminate();
     

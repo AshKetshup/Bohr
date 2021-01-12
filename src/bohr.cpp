@@ -71,20 +71,26 @@ int main(int argc, char const *argv[]) {
 
     float currentFrame;
     while (!glfwWindowShouldClose(window)) {
-        currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
+        try {
+            currentFrame = glfwGetTime();
+            deltaTime = currentFrame - lastFrame;
+            lastFrame = currentFrame;
 
-        processInput(window);
+            processInput(window);
 
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        debug("Rendering at %.3f\n", currentFrame);
-        molecule.render_vanderWalls(lightingShader, camera, SCR_WIDTH, SCR_HEIGHT);
+            debug("Rendering at %.3f\n", currentFrame);
+            molecule.render_vanderWalls(lightingShader, camera, SCR_WIDTH, SCR_HEIGHT);
 
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+            glfwSwapBuffers(window);
+            glfwPollEvents();
+        } catch(const std::exception& e) {
+            std::cerr << e.what() << '\n';
+        } catch (...) {
+            std::cerr << "I dunno :(" << endl;
+        }
     }
 
     glfwTerminate();

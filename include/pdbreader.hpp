@@ -3,6 +3,7 @@
 
 #include "shader_m.h"
 #include "camera.h"
+#include "vbosphere.h"
 #include <glm/glm.hpp>
 #include <vector>
 #include <string>
@@ -13,7 +14,7 @@ class Point {
 public:
     float x, y, z;
     string toString();
-    glm::vec3 toVec3();
+    glm::vec3 toVec3() const;
 };
 
 class Atom {
@@ -25,6 +26,9 @@ public:
 };
 
 class Molecule {
+private:
+    vector<VBOSphere> spheres;
+    bool generateSpheres();
 public:
     vector<Atom> atoms;
     Point min, max;

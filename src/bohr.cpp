@@ -14,6 +14,10 @@
 #include <GLFW/glfw3.h>
 #include "shader_m.h"
 #include "camera.h"
+#include "pdbreader.hpp"
+#include "debug.h"
+
+using namespace std;
 
 GLFWwindow* initialize_glfw(int width, int height, const char* title);
 int initialize_glad(void);
@@ -49,15 +53,22 @@ int main(int argc, char const *argv[]) {
 
     if (!initialize_glad()) {
         std::cout << "Failed to initialize GLAD" << std::endl;
+        glfwTerminate();
         return -2;
     }
 
     glEnable(GL_DEPTH_TEST);
 
+    debug("Loading shaders...\n");
     Shader lightingShader = Shader("shaders/lighting_vs.glsl", "shaders/lighting_fs.glsl");
     Shader lampShader = Shader("shaders/lamp_vs.glsl", "shaders/lamp_fs.glsl");
 
+    debug("Reading molecule...\n");
+    Molecule molecule = Molecule().fromPDB("pdb/gabj-chainA-model.pdb");
+    cout << molecule.toString() << endl;
 
+
+    /*
     float currentFrame;
 
     while (!glfwWindowShouldClose(window)) {
@@ -74,7 +85,7 @@ int main(int argc, char const *argv[]) {
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-    
+    */
 
 
     glfwTerminate();

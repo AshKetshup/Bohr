@@ -1,31 +1,32 @@
-#ifndef CAMERA_H
-#define CAMERA_H
+#ifndef PDBREADER_H
+#define PDBREADER_H
 
 #include <vector>
+#include <string>
 using namespace std;
 
 class Point {
 public:
     float x, y, z;
+    string toString();
 };
 
 class Atom {
 public:
     Point center;
     float radius;
-    char  name[2];
-    Atom();
-    ~Atom();
+    char  name[3];
+    string toString();
 };
 
 class Molecule {
 public:
     vector<Atom> atoms;
     Point min, max;
-    Molecule();
-    ~Molecule();
+    string toString();
+    Molecule fromPDB(char *file);
 };
 
-Molecule getMoleculeFromPDB(char *file, vector<Atom> &atoms);
+int getMoleculeFromPDB(char *file, Molecule &molecule);
 
 #endif

@@ -35,9 +35,9 @@ public:
     string toString();
     Molecule fromPDB(char *file);
     Camera resetCamera();
-    void render_vanderWalls(Shader shader, Camera camera, const int SCR_WIDTH, const int SCR_HEIGHT) const;
+    void render_vanderWalls(Shader, Camera, const int, const int, float = 0.f, float = 0.f) const;
 };
 
-int getMoleculeFromPDB(char *file, Molecule &molecule);
+int getMoleculeFromPDB(char*, Molecule&);
 
 #endif

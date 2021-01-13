@@ -4,6 +4,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/*
+#define release(...)                                                      \
+    do {                                                                  \
+        fprintf(stdout, __VA_ARGS__);                                     \
+    } while(0)
+*/
+
 #ifndef NDEBUG
 
 #define debug(...)                                                        \

@@ -7,8 +7,8 @@
 
 #include <glm/gtc/constants.hpp>
 
-VBOSphere::VBOSphere(float rad, GLuint sl, GLuint st) :
-       radius(rad), slices(sl), stacks(st) 
+VBOSphere::VBOSphere(float rad, GLuint sl, GLuint st, glm::vec3 cl) :
+       radius(rad), slices(sl), stacks(st), color(cl)
 {
   
     nVerts = (slices+1) * (stacks + 1);

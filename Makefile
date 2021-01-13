@@ -1,12 +1,12 @@
-CC := g++
+CXX := g++
 
-CFLAGS := -Wall
-CFLAGS += -std=c++0x
+CFLAGS := -Wall -fpermissive
+CFLAGS += -std=c++17
 ifneq ($(OS), 'Windows_NT')
     CFLAGS += -D_POSIX_C_SOURCE
 endif
 
-LIBS := -lGL -lGLU -lGLEW `pkg-config --libs glfw3` -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl -lXinerama -lXcursor
+LIBS := -lGL -lGLU -lGLEW `pkg-config --libs glfw3` -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl -lXinerama -lXcursor -lstdc++fs
 LDFLAGS :=
 SANITIZERFLAGS := -fsanitize=address -fsanitize=undefined
 
@@ -18,8 +18,9 @@ DEPDIR := deps
 
 TARGET := bohr
 
-SOURCES := $(wildcard $(SRCDIR)/*.cpp)
+SOURCES += $(wildcard $(SRCDIR)/*.cpp)
 OBJECTS := $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SOURCES))
+
 
 debug: CFLAGS += -Og -g3 -fno-omit-frame-pointer $(SANITIZERFLAGS)
 debug: LDFLAGS += $(SANITIZERFLAGS)
@@ -29,10 +30,10 @@ release: CFLAGS += -O3 -g0 -DNDEBUG
 release: $(BINDIR)/$(TARGET)
 
 $(BINDIR)/$(TARGET): $(OBJECTS) | $(BINDIR)
-	@$(CC) -o $@ $^ $(LIBS) $(LDFLAGS)
+	@$(CXX) -o $@ $^ $(LIBS) $(LDFLAGS)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp | $(OBJDIR) $(DEPDIR)
-	@$(CC) -I$(INCDIR) -c $(CFLAGS) -o $@ \
+	@$(CXX) -I$(INCDIR) -c $(CFLAGS) -o $@ \
 	    -MT $@ -MMD -MP \
 	    -MF $(patsubst $(OBJDIR)/%.o, $(DEPDIR)/%.d, $@) \
 	    $<

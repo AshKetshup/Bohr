@@ -15,9 +15,19 @@
 #include "shader_m.h"
 #include "camera.h"
 #include "pdbreader.hpp"
+#include "osdialog.h"
 #include "debug.h"
+#include <string>
+
+#include <experimental/filesystem>
 
 using namespace std;
+
+typedef enum {
+    NO_ACTION,
+    CAMERA_RESET,
+    OPEN_FILE
+} action;
 
 GLFWwindow* initialize_glfw(int width, int height, const char* title);
 int initialize_glad(void);
@@ -25,7 +35,12 @@ int initialize_glad(void);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void processInput(GLFWwindow *window);
+action processInput(GLFWwindow *window, char **fname);
+
+char *openPDBFileDialog(void);
+bool isPBD(char *);
+
+void switchModeView(GLFWwindow* window, bool mode);
 
 
 /* Settings */
@@ -37,6 +52,11 @@ Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool  firstMouse = true;
+bool  modeView = false;
+
+/* Molecule rotation */
+float molrotx = 0.f;
+float molroty = 0.f;
 
 /* Timing */
 float deltaTime = 0.0f;
@@ -61,13 +81,9 @@ int main(int argc, char const *argv[]) {
 
     debug("Loading shaders...\n");
     Shader lightingShader = Shader("shaders/lighting_vs.glsl", "shaders/lighting_fs.glsl");
-    // Shader lampShader = Shader("shaders/lamp_vs.glsl", "shaders/lamp_fs.glsl");
 
-    debug("Reading molecule...\n");
-    Molecule molecule = Molecule().fromPDB("pdb/gabj-chainA-model.pdb");
-    cout << molecule.toString() << endl;
-
-    camera = molecule.resetCamera();
+    char *fname = NULL;
+    Molecule molecule;
 
     float currentFrame;
     while (!glfwWindowShouldClose(window)) {
@@ -76,13 +92,40 @@ int main(int argc, char const *argv[]) {
             deltaTime = currentFrame - lastFrame;
             lastFrame = currentFrame;
 
-            processInput(window);
+            switch (processInput(window, &fname)) {
+                case action::OPEN_FILE:
+                    if (fname != NULL) {
+                        if (isPBD(fname)) {
+                            cout << "Reading molecule from \"" << fname << "\"..." << endl;
+                            molecule = Molecule().fromPDB(fname);
+                            camera = molecule.resetCamera();
+                            debug("%s\n", molecule.toString().data());
+                        } else {
+                            cout << "This is not a valid PDB file." << endl;
+                            osdialog_message(OSDIALOG_ERROR, OSDIALOG_OK, "This is not a valid PDB file.");
+                        }
+                    } else {
+                        cout << "No file was selected." << endl;
+                        osdialog_message(OSDIALOG_INFO, OSDIALOG_OK, "No file was selected.");
+                    }
+                    if (fname != NULL) free(fname);
+                    break;
+                
+                case action::CAMERA_RESET:
+                    camera = molecule.resetCamera();
+                    molrotx = 0.f;
+                    molroty = 0.f;
+                    cout << "Camera position reseted." << endl;
+                    break;
+
+                default:
+                    break;
+            }
 
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            debug("Rendering at %.3f\n", currentFrame);
-            molecule.render_vanderWalls(lightingShader, camera, SCR_WIDTH, SCR_HEIGHT);
+            molecule.render_vanderWalls(lightingShader, camera, SCR_WIDTH, SCR_HEIGHT, molrotx, molroty);
 
             glfwSwapBuffers(window);
             glfwPollEvents();
@@ -118,7 +161,7 @@ GLFWwindow* initialize_glfw(int width, int height, const char* title) {
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
     
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
     return window;
 }
@@ -129,8 +172,8 @@ int initialize_glad(void) {
 }
 
 
-void processInput(GLFWwindow *window) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+action processInput(GLFWwindow *window, char **fname) {
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
@@ -141,6 +184,37 @@ void processInput(GLFWwindow *window) {
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
+    
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+        molrotx += 1.f * deltaTime;
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+        molrotx -= 1.f * deltaTime;
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+        molroty += 1.f * deltaTime;
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+        molroty -= 1.f * deltaTime;
+    
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+        return action::CAMERA_RESET;
+    
+    if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
+        switchModeView(window, false);
+        *fname = openPDBFileDialog();
+        switchModeView(window, true);
+        return (*fname != NULL) ? action::OPEN_FILE : action::NO_ACTION;
+    }
+
+    return action::NO_ACTION;
+}
+
+
+char *openPDBFileDialog(void) {
+    return osdialog_file(OSDIALOG_OPEN, NULL, NULL, NULL);
+}
+
+
+bool isPBD(char *fname) {
+    return string(std::experimental::filesystem::path(fname).extension()).compare(".pdb") == 0;
 }
 
 
@@ -168,4 +242,10 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     camera.ProcessMouseScroll(yoffset);
+}
+
+
+void switchModeView(GLFWwindow* window, bool mode) {
+    modeView = mode;
+    glfwSetInputMode(window, GLFW_CURSOR, mode ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_HIDDEN);
 }

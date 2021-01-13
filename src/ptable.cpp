@@ -28,3 +28,25 @@ int PeriodicTable::getVanDerWallsRadiusFromNumber(int number) {
         return NOT_FOUND;
     return PeriodicTable::PERIODIC_TABLE[number-1].vanderWalls;
 }
+
+
+AtomColorF PeriodicTable::getColorFromSymbol(string symbol){
+    return PeriodicTable::getColorFromNumber(PeriodicTable::getNumberFromSymbol(symbol));
+}
+
+
+AtomColorF PeriodicTable::getColorFromNumber(int number) {
+    if (number < 1 || number > NUM_ELEMENTS)
+        return DEFAULT_COLOR;
+    return PeriodicTable::PERIODIC_TABLE[number-1].color.toFloat();
+}
+
+
+AtomColorF AtomColor::toFloat(void) const {
+    return {r / 255.f, g / 255.f, b / 255.f};
+}
+
+
+glm::vec3 AtomColorF::toVec3(void) const {
+    return glm::vec3(r, g, b);
+}

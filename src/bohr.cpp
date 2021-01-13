@@ -61,7 +61,6 @@ int main(int argc, char const *argv[]) {
 
     debug("Loading shaders...\n");
     Shader lightingShader = Shader("shaders/lighting_vs.glsl", "shaders/lighting_fs.glsl");
-    // Shader lampShader = Shader("shaders/lamp_vs.glsl", "shaders/lamp_fs.glsl");
 
     debug("Reading molecule...\n");
     Molecule molecule = Molecule().fromPDB("pdb/gabj-chainA-model.pdb");
@@ -81,7 +80,7 @@ int main(int argc, char const *argv[]) {
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            debug("Rendering at %.3f\n", currentFrame);
+            // debug("Camera position at (%.3f, %.3f, %.3f)\n", camera.Position.x, camera.Position.y, camera.Position.z);
             molecule.render_vanderWalls(lightingShader, camera, SCR_WIDTH, SCR_HEIGHT);
 
             glfwSwapBuffers(window);

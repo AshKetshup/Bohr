@@ -49,7 +49,7 @@ Molecule Molecule::fromPDB(char *file) {
 bool Molecule::generateSpheres(void) {
     this->spheres = vector<VBOSphere>();
     for (auto atom : this->atoms) {
-        this->spheres.push_back(VBOSphere(atom.radius, 10, 10));
+        this->spheres.push_back(VBOSphere(atom.radius, 10, 10, PeriodicTable::getColorFromSymbol(atom.name).toVec3()));
     }
     return true;
 }
@@ -57,14 +57,14 @@ bool Molecule::generateSpheres(void) {
 
 void Molecule::render_vanderWalls(Shader shader, Camera camera, const int SCR_WIDTH, const int SCR_HEIGHT) const {
     glm::vec3 lightColor  = glm::vec3(1.0f, 1.0f, 1.0f);
-    glm::vec3 objectColor = glm::vec3(1.0f, 0.5f, 0.31f);
     glm::vec3 lightPos    = camera.Position;
 
     shader.use();
-    for (int i = 0; i < this->spheres.size(); i++) {
-        shader.setVec3("objectColor", objectColor);
-        shader.setVec3("lamp.lightColor", lightColor);
-        shader.setVec3("lamp.lightPos", lightPos);
+    shader.setVec3("lamp.lightColor", lightColor);
+    shader.setVec3("lamp.lightPos",   lightPos);
+    
+    for (size_t i = 0; i < this->spheres.size(); i++) {
+        shader.setVec3("objectColor", this->spheres[i].color);
 
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -87,7 +87,7 @@ void Molecule::render_vanderWalls(Shader shader, Camera camera, const int SCR_WI
 Camera Molecule::resetCamera(void) {
     float x = (this->min.x + this->max.x) / 2;
     float y = (this->min.y + this->max.y) / 2;
-    float z = this->min.z;
+    float z = fabs(x) + fabs(y); // this->max.z;
     return Camera(glm::vec3(x, y, z));
 }
 

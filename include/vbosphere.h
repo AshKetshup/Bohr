@@ -3,6 +3,7 @@
 
 #include "drawable.h"
 #include "cookbookogl.h"
+#include <glm/glm.hpp>
 
 class VBOSphere : public Drawable
 {
@@ -15,7 +16,9 @@ private:
     void generateVerts(float * , float * ,float *, GLuint *);
 
 public:
-    VBOSphere(float, GLuint, GLuint);
+    glm::vec3 color;
+    
+    VBOSphere(float, GLuint, GLuint, glm::vec3);
 
     void render() const;
 

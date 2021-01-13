@@ -28,7 +28,7 @@ int getMoleculeFromPDB(char *file, Molecule &molecule) {
             sscanf(&line[46], "%f", &atom.center.z);
             molecule.min.z = (na == 1) ? (atom.center.z) : (atom.center.z < molecule.min.z ? atom.center.z : molecule.min.z);
             molecule.max.z = (na == 1) ? (atom.center.z) : (atom.center.z > molecule.max.z ? atom.center.z : molecule.max.z);
-            sscanf(&line[77], "%s", &atom.name[0]);
+            sscanf(&line[76], "%s", &atom.name[0]);
             atom.radius = PeriodicTable::getVanDerWallsRadiusFromSymbol(atom.name) / 100.0f;
             molecule.atoms.push_back(atom);
         }

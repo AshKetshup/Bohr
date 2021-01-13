@@ -95,13 +95,13 @@ int main(int argc, char const *argv[]) {
         return -2;
     }
 
-    glEnable(GL_DEPTH_TEST);
-
     if (!initialize_fonts()) {
         glfwTerminate();
         std::cout << "Failed to initialize fonts" << std::endl;
         return -3;
     }
+
+    glEnable(GL_DEPTH_TEST);
 
     debug("Loading shaders...\n");
     Shader lightingShader = Shader("shaders/lighting_vs.glsl", "shaders/lighting_fs.glsl");
@@ -274,11 +274,19 @@ int initialize_fonts(void) {
 
 
 void RenderText(Shader &s, std::string text, float x, float y, float scale, glm::vec3 color) {
+    // debug("Rendering text %s...\n", text.data());
+    // glDisable(GL_DEPTH_TEST);
+    // glEnable(GL_CULL_FACE);
+    // glEnable(GL_BLEND);
+
+
     // activate corresponding render state	
     s.use();
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(SCR_WIDTH), 0.0f, static_cast<float>(SCR_HEIGHT));
-    s.setMat4("projection", projection);
-    s.setVec3("textColor", color);
+    // s.setMat4("projection", projection);
+    glUniformMatrix4fv(glGetUniformLocation(s.ID, "projection"), 1, GL_FALSE, &projection[0][0]);
+    // s.setVec3("textColor", color);
+    glUniform3f(glGetUniformLocation(s.ID, "textColor"), color.x, color.y, color.z);
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(font_VAO);
 
@@ -316,6 +324,10 @@ void RenderText(Shader &s, std::string text, float x, float y, float scale, glm:
     }
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
+
+    // glDisable(GL_CULL_FACE);
+    // glDisable(GL_BLEND);
+    // glEnable(GL_DEPTH_TEST);
 }
 
 

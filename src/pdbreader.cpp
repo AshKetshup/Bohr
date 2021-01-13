@@ -79,10 +79,10 @@ void Molecule::render_vanderWalls(Shader shader, Camera camera, const int SCR_WI
         // world transformation
         glm::mat4 model = glm::mat4(1.0f);
         glm::vec3 trans = this->atoms[i].center.toVec3();
-        model = glm::translate(model, trans);
-        model = glm::scale(model, glm::vec3(1.0f));
         model = glm::rotate(model, glm::radians(roty), glm::vec3(1.f, 0.f, 0.f));
         model = glm::rotate(model, glm::radians(rotz), glm::vec3(0.f, 1.f, 0.f));
+        model = glm::translate(model, trans);
+        model = glm::scale(model, glm::vec3(1.0f));
         shader.setMat4("model", model);
 
         this->spheres[i].render();

@@ -185,14 +185,22 @@ action processInput(GLFWwindow *window, char **fname) {
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
     
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        molrotx += 1.f * deltaTime;
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        molrotx -= 1.f * deltaTime;
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-        molroty += 1.f * deltaTime;
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-        molroty -= 1.f * deltaTime;
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_8) == GLFW_PRESS) {
+        // debug("Up\n");
+        molrotx += 1.f;
+    }
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
+        // debug("Down\n");
+        molrotx -= 1.f;
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS) {
+        // debug("Left\n");
+        molroty += 1.f;
+    }
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS) {
+        // debug("Right\n");
+        molroty -= 1.f;
+    }
     
     if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
         return action::CAMERA_RESET;

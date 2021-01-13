@@ -34,6 +34,7 @@ int initialize_glad(void);
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void mousebtn_callback(GLFWwindow* window, int button, int action, int mods);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 action processInput(GLFWwindow *window, char **fname);
 
@@ -62,6 +63,18 @@ float molroty = 0.f;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
+// Camera position
+float x = 0.0, y = -5.0;  // initially 5 units south of origin
+float deltaMove = 0.0;    // initially camera doesn't move
+
+// Camera direction
+float lx = 0.0, ly = 1.0; // camera points initially along y-axis
+float angle = 0.0;        // angle of rotation for the camera direction
+float deltaAngle = 0.0;   // additional angle change when dragging
+
+// Mouse drag control
+int isDragging = 0;       // true when dragging
+int xDragStart = 0;       // records the x-coordinate when dragging starts
 
 int main(int argc, char const *argv[]) {
     GLFWwindow* window = initialize_glfw(SCR_WIDTH, SCR_HEIGHT, "BOHR - Very Small PDB Molecular Visualizer");
@@ -158,9 +171,15 @@ GLFWwindow* initialize_glfw(int width, int height, const char* title) {
     
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetScrollCallback(window, scroll_callback);
     
+    // process mouse button push/release
+    glfwSetMouseButtonCallback(window, mousebtn_callback);
+
+    // process mouse dragging motion
+    glfwSetCursorPosCallback(window, mouse_callback);
+
+    // process mouse scrolling motion
+    glfwSetScrollCallback(window, scroll_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
     return window;
@@ -222,6 +241,22 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
+void mousebtn_callback(GLFWwindow *window, int button, int action, int mods) {
+    bool lbutton_down;
+    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        if (GLFW_PRESS == action)
+            lbutton_down = true;
+        else if (GLFW_RELEASE == action)
+            lbutton_down = false;
+    }
+
+    if (lbutton_down) {
+        double x, y;
+        glfwGetCursorPos(window, &x, &y);
+
+    }
+}
+
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     if (firstMouse) {
@@ -232,10 +267,8 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     
     float xoffset = xpos - lastX;
     float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-    
     lastX = xpos;
     lastY = ypos;
-    
     camera.ProcessMouseMovement(xoffset, yoffset);
 }
 

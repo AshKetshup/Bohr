@@ -45,7 +45,7 @@ doc/*.bbl
 doc/*.lof
 doc/*.log
 doc/*.out
-doc/*.pdf
+# doc/*.pdf
 doc/*.synctex.gz
 doc/*.toc
 doc/*.lot

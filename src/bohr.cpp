@@ -16,6 +16,7 @@
 #include "camera.h"
 #include "pdbreader.hpp"
 #include "osdialog.h"
+#include "text.h"
 #include "debug.h"
 #include <string>
 #include <map>
@@ -33,16 +34,8 @@ typedef enum {
     OPEN_FILE
 } action;
 
-struct Character {
-    unsigned int TextureID;  // ID handle of the glyph texture
-    glm::ivec2   Size;       // Size of glyph
-    glm::ivec2   Bearing;    // Offset from baseline to left/top of glyph
-    unsigned int Advance;    // Offset to advance to next glyph
-};
-
 GLFWwindow* initialize_glfw(int width, int height, const char* title);
 int initialize_glad(void);
-int initialize_fonts(void);
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -53,13 +46,13 @@ char *openPDBFileDialog(void);
 bool isPBD(char *);
 
 void switchModeView(GLFWwindow* window, bool mode);
-
-void RenderText(Shader&, std::string, float, float, float, glm::vec3);
+void writeInstructions(TextRenderer, float, float, float);
+void writeText(TextRenderer, string, float, float, float);
 
 
 /* Settings */
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1600;
+const unsigned int SCR_HEIGHT = 900;
 
 /* Camera */
 Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -95,17 +88,18 @@ int main(int argc, char const *argv[]) {
         return -2;
     }
 
-    if (!initialize_fonts()) {
-        glfwTerminate();
-        std::cout << "Failed to initialize fonts" << std::endl;
-        return -3;
-    }
-
     glEnable(GL_DEPTH_TEST);
 
     debug("Loading shaders...\n");
     Shader lightingShader = Shader("shaders/lighting_vs.glsl", "shaders/lighting_fs.glsl");
-    Shader fontShader = Shader("shaders/font_vs.glsl", "shaders/font_fs.glsl");
+    // Shader fontShader = Shader("shaders/font_vs.glsl", "shaders/font_fs.glsl");
+
+    TextRenderer textrenderer = TextRenderer(SCR_WIDTH, SCR_HEIGHT);
+    try {
+        textrenderer.Load("fonts/UbuntuMono-R.ttf", 24);
+    } catch (const std::exception &e) {
+        std::cerr << e.what() << '\n';
+    }
 
     char *fname = NULL;
     Molecule molecule;
@@ -113,11 +107,15 @@ int main(int argc, char const *argv[]) {
     float currentFrame;
     while (!glfwWindowShouldClose(window)) {
         try {
+            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
             currentFrame = glfwGetTime();
             deltaTime = currentFrame - lastFrame;
             lastFrame = currentFrame;
 
-            RenderText(fontShader, "[O] Open file", 10.f, 10.f, 1.f, glm::vec3(1.f, 1.f, 1.f));
+            writeInstructions(textrenderer, 10.f, 10.f, 0.6f);
+            writeText(textrenderer, (fname != NULL) ? std::experimental::filesystem::path(fname).filename() : "No file opened", 10.f, SCR_HEIGHT - textrenderer.getFontSize(), 0.8f);
 
             switch (processInput(window, &fname)) {
                 case action::OPEN_FILE:
@@ -135,7 +133,7 @@ int main(int argc, char const *argv[]) {
                         cout << "No file was selected." << endl;
                         osdialog_message(OSDIALOG_INFO, OSDIALOG_OK, "No file was selected.");
                     }
-                    if (fname != NULL) free(fname);
+                    // if (fname != NULL) free(fname);
                     break;
                 
                 case action::CAMERA_RESET:
@@ -149,9 +147,6 @@ int main(int argc, char const *argv[]) {
                     break;
             }
 
-            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
             molecule.render_vanderWalls(lightingShader, camera, SCR_WIDTH, SCR_HEIGHT, molrotx, molroty);
 
             glfwSwapBuffers(window);
@@ -162,6 +157,8 @@ int main(int argc, char const *argv[]) {
             std::cerr << "I dunno :(" << endl;
         }
     }
+
+    if (fname != NULL) free(fname);
 
     glfwTerminate();
     
@@ -199,135 +196,17 @@ int initialize_glad(void) {
 }
 
 
-int initialize_fonts(void) {
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    FT_Library ft;
-    if (FT_Init_FreeType(&ft)) {
-        cout << "ERROR::FREETYPE: Could not init FreeType Library" << endl;
-        return 0;
-    }
-
-    FT_Face face;
-    if (FT_New_Face(ft, "fonts/UbuntuMono-R.ttf", 0, &face)) {
-        cout << "ERROR::FREETYPE: Failed to load font" << endl;
-        return 0;
-    }
-
-    FT_Set_Pixel_Sizes(face, 0, 48);
-
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction
-  
-    for (unsigned char c = 0; c < 128; c++) {
-        // load character glyph 
-        if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-            cout << "ERROR::FREETYTPE: Failed to load Glyph" << endl;
-            continue;
-        }
-        // generate texture
-        unsigned int texture;
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_RED,
-            face->glyph->bitmap.width,
-            face->glyph->bitmap.rows,
-            0,
-            GL_RED,
-            GL_UNSIGNED_BYTE,
-            face->glyph->bitmap.buffer
-        );
-        // set texture options
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        // now store character for later use
-        Character character = {
-            texture, 
-            glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-            glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-            face->glyph->advance.x
-        };
-        Characters.insert(std::pair<char, Character>(c, character));
-    }
-
-    FT_Done_Face(face);
-    FT_Done_FreeType(ft);
-
-    glGenVertexArrays(1, &font_VAO);
-    glGenBuffers(1, &font_VBO);
-    glBindVertexArray(font_VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, font_VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
-    return 1;
+void writeInstructions(TextRenderer tr, float x, float y, float scale) {
+    tr.RenderText("          [O] Open File"      , x, y                                         , scale);
+    tr.RenderText("       [WASD] Move camera"    , x, y + 1.f * scale * (tr.getFontSize() + 5.f), scale);
+    tr.RenderText("[Arrows,2468] Rotate molecule", x, y + 2.f * scale * (tr.getFontSize() + 5.f), scale);
+    tr.RenderText("      [Mouse] Rotate camera"  , x, y + 3.f * scale * (tr.getFontSize() + 5.f), scale);
+    tr.RenderText("     [ESC, Q] Exit"           , x, y + 4.f * scale * (tr.getFontSize() + 5.f), scale);
 }
 
 
-void RenderText(Shader &s, std::string text, float x, float y, float scale, glm::vec3 color) {
-    // debug("Rendering text %s...\n", text.data());
-    // glDisable(GL_DEPTH_TEST);
-    // glEnable(GL_CULL_FACE);
-    // glEnable(GL_BLEND);
-
-
-    // activate corresponding render state	
-    s.use();
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(SCR_WIDTH), 0.0f, static_cast<float>(SCR_HEIGHT));
-    // s.setMat4("projection", projection);
-    glUniformMatrix4fv(glGetUniformLocation(s.ID, "projection"), 1, GL_FALSE, &projection[0][0]);
-    // s.setVec3("textColor", color);
-    glUniform3f(glGetUniformLocation(s.ID, "textColor"), color.x, color.y, color.z);
-    glActiveTexture(GL_TEXTURE0);
-    glBindVertexArray(font_VAO);
-
-    // iterate through all characters
-    std::string::const_iterator c;
-    for (c = text.begin(); c != text.end(); c++)
-    {
-        Character ch = Characters[*c];
-
-        float xpos = x + ch.Bearing.x * scale;
-        float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
-
-        float w = ch.Size.x * scale;
-        float h = ch.Size.y * scale;
-        // update font_VBO for each character
-        float vertices[6][4] = {
-            { xpos,     ypos + h,   0.0f, 0.0f },            
-            { xpos,     ypos,       0.0f, 1.0f },
-            { xpos + w, ypos,       1.0f, 1.0f },
-
-            { xpos,     ypos + h,   0.0f, 0.0f },
-            { xpos + w, ypos,       1.0f, 1.0f },
-            { xpos + w, ypos + h,   1.0f, 0.0f }           
-        };
-        // render glyph texture over quad
-        glBindTexture(GL_TEXTURE_2D, ch.TextureID);
-        // update content of font_VBO memory
-        glBindBuffer(GL_ARRAY_BUFFER, font_VBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); 
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        // render quad
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-        x += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64)
-    }
-    glBindVertexArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    // glDisable(GL_CULL_FACE);
-    // glDisable(GL_BLEND);
-    // glEnable(GL_DEPTH_TEST);
+void writeText(TextRenderer tr, string text, float x, float y, float scale) {
+    tr.RenderText(text, x, y, scale);
 }
 
 
@@ -358,6 +237,7 @@ action processInput(GLFWwindow *window, char **fname) {
     
     if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
         switchModeView(window, false);
+        if (*fname != NULL) free(*fname);
         *fname = openPDBFileDialog();
         switchModeView(window, true);
         return (*fname != NULL) ? action::OPEN_FILE : action::NO_ACTION;

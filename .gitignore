@@ -38,3 +38,19 @@ doc/ignore/
 deps/
 *.curr
 tags
+
+# LaTeX
+doc/*.aux
+doc/*.bbl
+doc/*.lof
+doc/*.log
+doc/*.out
+doc/*.pdf
+doc/*.synctex.gz
+doc/*.toc
+doc/*.lot
+doc/*.blg
+doc/*.bcf
+doc/*.run.xml
+doc/_minted*
+doc/*.lol

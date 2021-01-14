@@ -16,10 +16,15 @@
 #include "camera.h"
 #include "pdbreader.hpp"
 #include "osdialog.h"
+#include "text.h"
 #include "debug.h"
 #include <string>
+#include <map>
 
 #include <experimental/filesystem>
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 using namespace std;
 
@@ -42,11 +47,13 @@ char *openPDBFileDialog(void);
 bool isPBD(char *);
 
 void switchModeView(GLFWwindow* window, bool mode);
+void writeInstructions(TextRenderer, float, float, float);
+void writeText(TextRenderer, string, float, float, float);
 
 
 /* Settings */
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1600;
+const unsigned int SCR_HEIGHT = 900;
 
 /* Camera */
 Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -63,18 +70,10 @@ float molroty = 0.f;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-// Camera position
-float x = 0.0, y = -5.0;  // initially 5 units south of origin
-float deltaMove = 0.0;    // initially camera doesn't move
+/* Fonts */
+unsigned int font_VAO, font_VBO;
+std::map<char, Character> Characters;
 
-// Camera direction
-float lx = 0.0, ly = 1.0; // camera points initially along y-axis
-float angle = 0.0;        // angle of rotation for the camera direction
-float deltaAngle = 0.0;   // additional angle change when dragging
-
-// Mouse drag control
-int isDragging = 0;       // true when dragging
-int xDragStart = 0;       // records the x-coordinate when dragging starts
 
 int main(int argc, char const *argv[]) {
     GLFWwindow* window = initialize_glfw(SCR_WIDTH, SCR_HEIGHT, "BOHR - Very Small PDB Molecular Visualizer");
@@ -94,6 +93,14 @@ int main(int argc, char const *argv[]) {
 
     debug("Loading shaders...\n");
     Shader lightingShader = Shader("shaders/lighting_vs.glsl", "shaders/lighting_fs.glsl");
+    // Shader fontShader = Shader("shaders/font_vs.glsl", "shaders/font_fs.glsl");
+
+    TextRenderer textrenderer = TextRenderer(SCR_WIDTH, SCR_HEIGHT);
+    try {
+        textrenderer.Load("fonts/UbuntuMono-R.ttf", 24);
+    } catch (const std::exception &e) {
+        std::cerr << e.what() << '\n';
+    }
 
     char *fname = NULL;
     Molecule molecule;
@@ -101,9 +108,15 @@ int main(int argc, char const *argv[]) {
     float currentFrame;
     while (!glfwWindowShouldClose(window)) {
         try {
+            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
             currentFrame = glfwGetTime();
             deltaTime = currentFrame - lastFrame;
             lastFrame = currentFrame;
+
+            writeInstructions(textrenderer, 10.f, 10.f, 0.6f);
+            writeText(textrenderer, (fname != NULL) ? std::experimental::filesystem::path(fname).filename() : "No file opened", 10.f, SCR_HEIGHT - textrenderer.getFontSize(), 0.8f);
 
             switch (processInput(window, &fname)) {
                 case action::OPEN_FILE:
@@ -112,7 +125,7 @@ int main(int argc, char const *argv[]) {
                             cout << "Reading molecule from \"" << fname << "\"..." << endl;
                             molecule = Molecule().fromPDB(fname);
                             camera = molecule.resetCamera();
-                            debug("%s\n", molecule.toString().data());
+                            debug("\n%s\n", molecule.toString().data());
                         } else {
                             cout << "This is not a valid PDB file." << endl;
                             osdialog_message(OSDIALOG_ERROR, OSDIALOG_OK, "This is not a valid PDB file.");
@@ -121,7 +134,7 @@ int main(int argc, char const *argv[]) {
                         cout << "No file was selected." << endl;
                         osdialog_message(OSDIALOG_INFO, OSDIALOG_OK, "No file was selected.");
                     }
-                    if (fname != NULL) free(fname);
+                    // if (fname != NULL) free(fname);
                     break;
                 
                 case action::CAMERA_RESET:
@@ -135,9 +148,6 @@ int main(int argc, char const *argv[]) {
                     break;
             }
 
-            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
             molecule.render_vanderWalls(lightingShader, camera, SCR_WIDTH, SCR_HEIGHT, molrotx, molroty);
 
             glfwSwapBuffers(window);
@@ -148,6 +158,8 @@ int main(int argc, char const *argv[]) {
             std::cerr << "I dunno :(" << endl;
         }
     }
+
+    if (fname != NULL) free(fname);
 
     glfwTerminate();
     
@@ -191,6 +203,20 @@ int initialize_glad(void) {
 }
 
 
+void writeInstructions(TextRenderer tr, float x, float y, float scale) {
+    tr.RenderText("          [O] Open File"      , x, y                                         , scale);
+    tr.RenderText("       [WASD] Move camera"    , x, y + 1.f * scale * (tr.getFontSize() + 5.f), scale);
+    tr.RenderText("[Arrows,2468] Rotate molecule", x, y + 2.f * scale * (tr.getFontSize() + 5.f), scale);
+    tr.RenderText("      [Mouse] Rotate camera"  , x, y + 3.f * scale * (tr.getFontSize() + 5.f), scale);
+    tr.RenderText("     [ESC, Q] Exit"           , x, y + 4.f * scale * (tr.getFontSize() + 5.f), scale);
+}
+
+
+void writeText(TextRenderer tr, string text, float x, float y, float scale) {
+    tr.RenderText(text, x, y, scale);
+}
+
+
 action processInput(GLFWwindow *window, char **fname) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -204,28 +230,21 @@ action processInput(GLFWwindow *window, char **fname) {
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
     
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_8) == GLFW_PRESS) {
-        // debug("Up\n");
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_8) == GLFW_PRESS)
         molrotx += 1.f;
-    }
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
-        // debug("Down\n");
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
         molrotx -= 1.f;
-    }
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS) {
-        // debug("Left\n");
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
         molroty += 1.f;
-    }
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS) {
-        // debug("Right\n");
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS)
         molroty -= 1.f;
-    }
     
     if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
         return action::CAMERA_RESET;
     
     if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
         switchModeView(window, false);
+        if (*fname != NULL) free(*fname);
         *fname = openPDBFileDialog();
         switchModeView(window, true);
         return (*fname != NULL) ? action::OPEN_FILE : action::NO_ACTION;

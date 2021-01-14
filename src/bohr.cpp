@@ -53,8 +53,8 @@ void writeText(TextRenderer, string, float, float, float);
 /* Settings */
 const unsigned int SCR_WIDTH  = 1600;
 const unsigned int SCR_HEIGHT = 900;
-unsigned int screen_width     = SCR_WIDTH;
-unsigned int screen_height    = SCR_HEIGHT;
+unsigned int screen_width;
+unsigned int screen_height;
 
 /* Camera */
 Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -72,12 +72,15 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 /* Fonts */
-TextRenderer textrenderer = TextRenderer(screen_width, screen_height);
+TextRenderer textrenderer = TextRenderer(SCR_WIDTH, SCR_HEIGHT);
 unsigned int font_VAO, font_VBO;
 std::map<char, Character> Characters;
 
 
 int main(int argc, char const *argv[]) {
+    screen_width  = SCR_WIDTH;
+    screen_height = SCR_HEIGHT;
+
     GLFWwindow* window = initialize_glfw(screen_width, screen_height, "BOHR - Very Small PDB Molecular Visualizer");
     if (window == NULL) {
         std::cout << "Failed to create the window" << std::endl;

@@ -54,8 +54,6 @@ void writeText(TextRenderer, string, float, float, float);
 /* Settings */
 const unsigned int SCR_WIDTH  = 1600;
 const unsigned int SCR_HEIGHT = 900;
-unsigned int screen_width;
-unsigned int screen_height;
 
 /* Camera */
 Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -79,10 +77,7 @@ std::map<char, Character> Characters;
 
 
 int main(int argc, char const *argv[]) {
-    screen_width  = SCR_WIDTH;
-    screen_height = SCR_HEIGHT;
-
-    GLFWwindow* window = initialize_glfw(screen_width, screen_height, "BOHR - Very Small PDB Molecular Visualizer");
+    GLFWwindow* window = initialize_glfw(SCR_WIDTH, SCR_HEIGHT, "BOHR - Very Small PDB Molecular Visualizer");
     if (window == NULL) {
         std::cout << "Failed to create the window" << std::endl;
         glfwTerminate();
@@ -101,7 +96,7 @@ int main(int argc, char const *argv[]) {
     Shader lightingShader = Shader("shaders/lighting_vs.glsl", "shaders/lighting_fs.glsl");
     // Shader fontShader = Shader("shaders/font_vs.glsl", "shaders/font_fs.glsl");
 
-    // TextRenderer textrenderer = TextRenderer(screen_width, screen_height);
+    // TextRenderer textrenderer = TextRenderer(SCR_WIDTH, SCR_HEIGHT);
     try {
         textrenderer.Load("fonts/UbuntuMono-R.ttf", 24);
     } catch (const std::exception &e) {
@@ -154,7 +149,7 @@ int main(int argc, char const *argv[]) {
                     break;
             }
 
-            molecule.render_vanderWalls(lightingShader, camera, screen_width, screen_height, molrotx, molroty);
+            molecule.render_vanderWalls(lightingShader, camera, SCR_WIDTH, SCR_HEIGHT, molrotx, molroty);
 
             glfwSwapBuffers(window);
             glfwPollEvents();
@@ -272,7 +267,6 @@ bool isPBD(char *fname) {
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
-    textrenderer = TextRenderer(screen_width, screen_height);
 }
 
 void mousebtn_callback(GLFWwindow *window, int button, int action, int mods) {

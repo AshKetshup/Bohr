@@ -5,9 +5,7 @@
 \section{Introdução}
 \label{sec::tecno:intro}
 
-Antes da implementação propriamente dita da aplicação, é necessário estabelecer quais as ferramentas e as tecnologias utilizadas a fim de alcançar os objetivos propostos para o projeto.
-
-Este Capítulo aborda este tópico, % to be continued...
+Antes da implementação propriamente dita da aplicação, é necessário estabelecer quais as ferramentas e as tecnologias utilizadas a fim de alcançar os objetivos propostos para o projeto. Este Capítulo aborda, portanto, este tópico.
 
 
 \section{Ferramentas e tecnologias utilizadas}
@@ -20,37 +18,61 @@ As ferramentas utilizadas no âmbito da realização do projeto, sumariadas na T
 	\item controlo de versões.
 \end{inparaenum}
 
-Text\ldots
+Segue-se uma descrição do uso de cada uma das tecnologias:
 
+\begin{itemize}
+    \item \textbf{\opengl~\cite{opengl}}: \ac{API} multi-plataforma e com suporte a múltiplas linguagens de programação para a renderização de gráficos vetoriais 2D e 3D com recurso à placa gráfica;
+    
+    \item \textbf{GLFW~\cite{glfw}}: \ac{API} simplificada para o \opengl, igualmente multi-plataforma, permitindo a gestão de janelas, contextos, superfícies e comandos (rato, teclado e \textit{joystick});
+    
+    \item \textbf{GLM~\cite{glm}}: biblioteca matemática baseada na linguagem dos \textit{shaders} do \opengl, \ac{GLSL}.
+    
+    \item \textbf{\ac{GLAD}~\cite{glad,glad-webservice}}: gerador automático de \textit{loaders} para \opengl;
+    
+    \item \textbf{\textit{FreeType}~\cite{freetype}}: biblioteca de desenvolvimento dedicada à renderização de fontes em \textit{bitmaps} utilizáveis, por exemplo, pelo \opengl.
+\end{itemize}
 
 \begin{table}[!htbp]
-	\centering
-	\begin{tabular}{p{1cm} l l}
-		\toprule
-		& {\bfseries \textit{Software} / Tecnologia} & {\bfseries Versão} \\
-		\midrule
-		\multicolumn{3}{l}{\bfseries Aplicação \opengl} \\
-		& \textit{Android Studio} & 4.1.1 \\
-		&  &  \\
-		&  &  \\
-		&  &  \\
-		\midrule
-		\multicolumn{3}{l}{\bfseries Relatório} \\
-		& Xe\TeX & 3.14159265-2.6-0.999991 \\
-		& \textit{TeXstudio}\textsuperscript{\textcopyright} & 3.0.1 \\
-		\midrule
-		\multicolumn{3}{l}{\bfseries Controlo de versões} \\
-		& \textit{git} & 2.17.1 \\
-		& \textit{GitKraken} & 7.4.1  \\
-		\bottomrule
-	\end{tabular}
-	\caption[Ferramentas utilizadas]{Ferramentas e tecnologias utilizadas, organizadas por categoria.}
-	\label{tab::ferramentas}
+    \centering
+    \begin{tabular}{p{1cm} l l}
+        \toprule
+        & {\bfseries \textit{Software} / Tecnologia} & {\bfseries Versão} \\
+        \midrule
+        \multicolumn{3}{l}{\bfseries Aplicação \opengl} \\
+        & \opengl           & 4.6 \\
+        & GLFW              & 3.3.2 \\
+        & GLAD              & 0.1.34 \\
+        & \acs{GLM}         & 0.9.9.8 \\
+        & \textit{FreeType} & 2.10.4 \\
+        \midrule
+        \multicolumn{3}{l}{\bfseries Relatório} \\
+        & Xe\TeX & 3.14159265-2.6-0.999991 \\
+        & \textit{TeXstudio}\textsuperscript{\textcopyright} & 3.0.1 \\
+        \midrule
+        \multicolumn{3}{l}{\bfseries Controlo de versões} \\
+        & \textit{git} & 2.17.1 \\
+        & \textit{GitKraken} & 7.4.1  \\
+        \bottomrule
+    \end{tabular}
+    \caption[Ferramentas utilizadas]{Ferramentas e tecnologias utilizadas, organizadas por categoria.}
+    \label{tab::ferramentas}
 \end{table}
 
+
+\section{Código \textit{open source}}
+
+Foi utilizado código \textit{open source}, adaptado para o projeto sob as respetivas licenças, para as seguintes funcionalidades:
+
+\begin{itemize}
+    \item \textbf{\itshape Sphere}~\cite{glsl-cookbook-github,vbosphere}: obtido dos códigos de exemplo do \textit{OpenGL Shading Language Cookbook, 2nd Edition} para renderizar esferas sem recurso a ficheiros \verb*|*.obj| criados externamente;
+    
+    \item \textbf{\itshape osdialog}~\cite{osdialog}: biblioteca multi-plataforma para acesso facilitado às caixas de diálogo do sistema operativo, com o fim de permitir abrir qualquer ficheiro \ac{PDB} dinamicamente a qualquer momento e mostrar mensagens de erro ao utilizador.
+\end{itemize}
+
+O projeto \theapp~será por sua vez disponibilizado sob a licença \textit{GNU General Public License, version 3}~\cite{gnugpl3}, após apresentação e caso seja autorizado pelo Professor regente.
 
 
 \section{Conclusões}
 \label{sec::tecno:conclusao}
 
-Text\ldots
+Após delineadas as ferramentas e tecnologias a utilizar, segue-se a fase de desenvolvimento do projeto, descrito no Capítulo seguinte. A utilização de código \textit{open source} e de ferramentas bem conhecidas e testadas pela comunidade mundial permitirá, em princípio, uma implementação eficiente.

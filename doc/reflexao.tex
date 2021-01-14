@@ -4,7 +4,7 @@
 \section{Introdução}
 \label{sec::reflexao:intro}
 
-Não obstante o bom planeamento feito \textit{a priori}, o projeto \theapp, tal como qualquer outro na área das \ac{TI}, enfrentou alguns contratempos e, devido a problemas de saúde e pessoais severos por parte de um dos membros do grupo, não se revelou possível almejar todas as ambições inicialmente imaginadas. É preciso, pois, refletir sobre o desenvolvimento deste projeto.
+Não obstante o planeamento feito \textit{a priori}, o projeto \theapp, tal como qualquer outro na área das \ac{TI}, enfrentou alguns contratempos e, devido a problemas de saúde e pessoais severos por parte de um dos membros do grupo, não se revelou possível almejar todas as ambições inicialmente imaginadas. É preciso, pois, refletir sobre o desenvolvimento deste projeto.
 
 Neste Capítulo são, portanto, explorados os seguintes tópicos:
 
@@ -20,7 +20,7 @@ Neste Capítulo são, portanto, explorados os seguintes tópicos:
 \section{Objetivos Propostos vs. Alcançados}
 \label{sec::reflexao:objetivos}
 
-A Tabela \ref{tab::objetivos} expõe os objetivos propostos inicialmente para o projeto e identifica quais foram alcançados na sua plenitude, quais foram alcançados apenas parcialmente, e quais não tiveram sucesso. De notar que foram foram incluídos 3 idiomas: Português de Portugal (\textit{pt-pt}), Inglês Britânico (\textit{en-uk}) e Francês (\textit{fr}).
+A Tabela \ref{tab::objetivos} expõe os objetivos propostos inicialmente para o projeto e identifica quais foram alcançados na sua plenitude, quais foram alcançados apenas parcialmente, e quais não tiveram sucesso.
 
 \begin{table}[!htbp]
 	\centering
@@ -28,16 +28,19 @@ A Tabela \ref{tab::objetivos} expõe os objetivos propostos inicialmente para o 
 		\toprule
 		{\bfseries Objetivo proposto} & {\bfseries Alcançado?} \\
 		\midrule
-		 & $\bullet$ \\
-		 & $\bullet$ \\
-		 & $\bullet$ \\
-		 & $\bullet$ \\
-		 & $\bullet$ \\
-		 & $\bullet$ \\
-		 & $\bullet$ \\
-		 & $\circ$   \\
-		 & $\circ$   \\
-		 & --        \\
+		\textit{Parsing} de ficheiros \acs{PDB}              & $\bullet$ \\
+		Computação das esferas                               & $\bullet$ \\
+		Obtenção do raio de cada átomo                       & $\bullet$ \\
+		Obtenção da cor CPK de cada átomo                    & $\bullet$ \\
+		Renderização de uma esfera                           & $\bullet$ \\
+		Renderização de uma molécula                         & $\bullet$ \\
+		Rotação de uma molécula                              & $\bullet$ \\
+		Movimentação da câmara                               & $\bullet$ \\
+		Abertura dinâmica de ficheiros por interface gráfica & $\bullet$ \\
+		Renderização da superfície de \textit{van der Walls} & $\bullet$ \\
+        Suporte a proteínas                                  & $\circ$   \\
+        Renderização da superfície implícita \textit{pi}     & --        \\
+        Utilização regular do \textit{Trello}                & --        \\
 		\bottomrule
 	\end{tabular}
 	\caption[Objetivos propostos vs. alcançados]{
@@ -54,22 +57,16 @@ A Tabela \ref{tab::objetivos} expõe os objetivos propostos inicialmente para o 
 		\toprule
 		\textbf{Tarefa} & \textbf{DS} & \textbf{IN} \\
 		\midrule
-		 &             &             \\
-		 &             &             \\
-		 &             &             \\
-		 &             &             \\
-		 &             & $\bullet$   \\
-		 &             & $\bullet$   \\
-		 & $\bullet$   &             \\
-		 & $\bullet$   &             \\
-		 &             &             \\
-		 &             &             \\
-		 &             & $\bullet$   \\
-		 & $\bullet$   & $\circ$     \\
-		 &             &             \\
-		 &             &             \\
-		 &             &             \\
-		 &             &             \\
+        \textit{Parsing} de ficheiros \acs{PDB}              &  & $\bullet$ \\
+        Computação das esferas                               &  & $\bullet$ \\
+        Obtenção do raio de cada átomo                       & $\bullet$ &  \\
+        Obtenção da cor CPK de cada átomo                    & $\bullet$ &  \\
+        Renderização de uma esfera                           &  & $\bullet$ \\
+        Renderização de uma molécula                         &  & $\bullet$ \\
+        Rotação de uma molécula                              & $\bullet$ &  \\
+        Movimentação da câmara                               & $\bullet$ &  \\
+        Abertura dinâmica de ficheiros por interface gráfica &  & $\bullet$ \\
+        Renderização da superfície de \textit{van der Walls} &  & $\bullet$ \\
 		\bottomrule
 	\end{tabular}
 	\caption[Distribuição de tarefas]{
@@ -85,7 +82,7 @@ A Tabela \ref{tab::objetivos} expõe os objetivos propostos inicialmente para o 
 \section{Divisão de Trabalho pelos Elementos do Grupo}
 \label{sec::reflexao:divisao}
 
-A fim de agilizar o desenvolvimento do projeto, as tarefas foram distribuídas de forma balanceada pelos dois elementos da equipa a fim de jogar com os respetivos pontos fortes (Tabela \ref{tab::divisao-trabalho}). De notar que, apesar da divisão de tarefas, a participação do grupo no seu todo foi essencial nos momentos de entreajuda, esclarecimento de dúvidas e consolidação da aplicação final.
+A fim de agilizar o desenvolvimento do projeto, as tarefas foram distribuídas de forma balanceada pelos dois elementos da equipa (Tabela \ref{tab::divisao-trabalho}). De notar que, apesar da divisão de tarefas, a participação do grupo no seu todo foi essencial nos momentos de entreajuda, esclarecimento de dúvidas e consolidação da aplicação final.
 
 % Reuniões semanais foram realizadas com \textit{deadlines} bem definidas para cada tarefa, tendo sido realizadas reuniões extraordinárias em momentos críticos do desenvolvimento.
 
@@ -98,20 +95,18 @@ A implementação da aplicação levou a que o grupo encontrasse alguns problema
 
 \begin{table}[!htbp]
 	\centering
-	\begin{tabular}{p{.56\textwidth} p{.36\textwidth}}
+	\begin{tabular}{p{.36\textwidth} p{.56\textwidth}}
 		\toprule
 		{\bfseries Problema} & {\bfseries Solução} \\
 		\midrule
 		\midrule
-		 &  \\
+        \textit{Parsing} dos ficheiros \ac{PDB}. & Estudo do formato segundo descrito em diversos fóruns \textit{online} a fim de determinar as posições exatas dos dados relativo a cada átomo. \\
+        \midrule
+		Procura do método mais eficiente para renderizar uma esfera. & Utilização da classe \textit{Sphere} disponibilizada no \textit{OpenGL Shading Language Cookbook, 2nd Edition} \cite{vbosphere} a fim de evitar a importação de objetos externos. \\
 		\midrule
-		 &  \\
+		Determinação da superfície implícita \textit{pi}. & Sem solução encontrada. É necessário mais estudo. \\
 		\midrule
-		 &  \\
-		\midrule
-		 &  \\
-		\midrule
-		 &  \\
+		Renderização da superfície implícita \textit{pi} e dificuldade do algoritmo \textit{marching cubes}. & Adoção do algoritmo \textit{marching triangles} com recurso ao código \textit{open source} disponível em \cite{marchingtriangles}. Solução não presente na aplicação final devido ao problema anterior não solucionado. \\
 		\bottomrule
 	\end{tabular}
 	\caption[Problemas encontrados e respetivas soluções]{Problemas encontrados durante o desenvolvimento da aplicação e respetivas soluções adotadas.}
@@ -129,7 +124,10 @@ Tendo por objetivo expor a reflexão da \groupname~face ao trabalho enveredado n
 \label{ssec::reflexao:critica:fortes}
 
 \begin{enumerate}[nosep]
-	\item Text\ldots
+	\item A aplicação permite abrir uma nova molécula a qualquer momento.
+    \item É utilizada interface gráfica do sistema operativo para interagir com o utilizador.
+    \item As esferas são calculadas dinamicamente pela aplicação sem recurso a objetos externos.
+    \item O renderizador tem em conta a cor de cada átomo e o respetivo raio de \textit{van der Walls}, mostrando assim a superfície de \textit{van der Walls}.
 \end{enumerate}
 
 
@@ -137,7 +135,10 @@ Tendo por objetivo expor a reflexão da \groupname~face ao trabalho enveredado n
 \label{ssec::reflexao:critica:fracos}
 
 \begin{enumerate}[nosep]
-	\item Text\ldots
+	\item O \textit{parser} \ac{PDB} não contempla ficheiros relativos a proteínas.
+    \item O mesmo código-fonte compilado em diferentes sistemas operativos não garante exatamente o mesmo comportamento em relação à câmara e ao teclado.
+    \item Não é calculada a superfície implícita \textit{pi}, não sendo então possível renderizar esta.
+    \item Só é renderizado um tipo de superfície molecular.
 \end{enumerate}
 
 
@@ -145,7 +146,10 @@ Tendo por objetivo expor a reflexão da \groupname~face ao trabalho enveredado n
 \label{ssec::reflexao:critica:ameacas}
 
 \begin{enumerate}[nosep]
-	\item Text\ldots
+	\item O \textit{software} não contempla a possibilidade de fechar a molécula atualmente aberta nem se mostrar várias moléculas lado-a-lado.
+    \item O uso de interface gráfica não tem um comportamento garantido em \textit{cross-platform}.
+    \item Para moléculas de grandes dimensões, a aplicação poderá facilmente tornar-se exigente em termos de recursos de memória.
+    \item Já existem variados \textit{softwares} de visualização molecular, apesar da pertinência deste projeto no âmbito da \ac{UC} de \ac{CG}.
 \end{enumerate}
 
 
@@ -153,9 +157,24 @@ Tendo por objetivo expor a reflexão da \groupname~face ao trabalho enveredado n
 \label{ssec::reflexao:critica:oportunidades}
 
 \begin{enumerate}[nosep]
-	\item Text\ldots
+	\item Adicionar suporte para aminoácidos.
+    \item Adaptar com \textit{flags} do pré-processador do C++ o código-fonte a fim de ultrapassar as limitações em cada sistema operativo.
+    \item Determinar a superfície implícita \textit{pi} a fim de dar uso ao algoritmo \textit{marching triangles} estudado para este projeto.
+    \item Renderizar mais superfícies, tendo em conta os vários raios armazenados na tabela periódica interna da aplicação.
 \end{enumerate}
 
+
+
+\section{Notas finais}
+\label{sec::reflexao:notas}
+
+Antes de terminar a reflexão crítica, é pertinente levar em conta os problemas pessoais e de saúde enfrentados por cada um dos membros do grupo que acabou por levar a um significativo atraso da conclusão do projeto face à data prevista.
+
+O grupo reconhece, portanto, este mesmo atraso, o qual culminou no não cumprimento total dos objetivos inicialmente propostos para este projeto.
+
+Não obstante, o facto de esta aplicação ter por base op cálculo e a renderização dinâmica de todos os seus elementos, ao invés de uma abordagem \textit{hard-coded}, levantou novos desafios até então não encontrados durante as aulas práticas da \ac{UC} de \ac{CG}.
+
+Consideramos, portanto, que, apesar do lamentável atraso, o resultado final obtido é satisfatório.
 
 
 \section{Conclusões}

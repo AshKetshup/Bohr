@@ -71,7 +71,6 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 /* Fonts */
-TextRenderer textrenderer = TextRenderer(SCR_WIDTH, SCR_HEIGHT);
 unsigned int font_VAO, font_VBO;
 std::map<char, Character> Characters;
 
@@ -96,7 +95,7 @@ int main(int argc, char const *argv[]) {
     Shader lightingShader = Shader("shaders/lighting_vs.glsl", "shaders/lighting_fs.glsl");
     // Shader fontShader = Shader("shaders/font_vs.glsl", "shaders/font_fs.glsl");
 
-    // TextRenderer textrenderer = TextRenderer(SCR_WIDTH, SCR_HEIGHT);
+    TextRenderer textrenderer = TextRenderer(SCR_WIDTH, SCR_HEIGHT);
     try {
         textrenderer.Load("fonts/UbuntuMono-R.ttf", 24);
     } catch (const std::exception &e) {
@@ -109,7 +108,7 @@ int main(int argc, char const *argv[]) {
     float currentFrame;
     while (!glfwWindowShouldClose(window)) {
         try {
-            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            glClearColor(0.f, 0.f, 51.f / 255.f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             currentFrame = glfwGetTime();

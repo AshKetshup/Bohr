@@ -48,6 +48,7 @@ bool isPBD(char *);
 
 void switchModeView(GLFWwindow* window, bool mode);
 void writeInstructions(TextRenderer, float, float, float);
+void writeAuthors(TextRenderer, float, float, float);
 void writeText(TextRenderer, string, float, float, float);
 
 
@@ -116,6 +117,7 @@ int main(int argc, char const *argv[]) {
             lastFrame = currentFrame;
 
             writeInstructions(textrenderer, 10.f, 10.f, 0.6f);
+            writeAuthors(textrenderer, 1470.f, SCR_HEIGHT - 2.f * textrenderer.getFontSize(), 0.75f);
             writeText(textrenderer, (fname != NULL) ? std::experimental::filesystem::path(fname).filename() : "No file opened", 10.f, SCR_HEIGHT - textrenderer.getFontSize(), 0.8f);
 
             switch (processInput(window, &fname)) {
@@ -209,6 +211,12 @@ void writeInstructions(TextRenderer tr, float x, float y, float scale) {
     tr.RenderText("[Arrows,2468] Rotate molecule", x, y + 2.f * scale * (tr.getFontSize() + 5.f), scale);
     tr.RenderText("      [Mouse] Rotate camera"  , x, y + 3.f * scale * (tr.getFontSize() + 5.f), scale);
     tr.RenderText("     [ESC, Q] Exit"           , x, y + 4.f * scale * (tr.getFontSize() + 5.f), scale);
+}
+
+
+void writeAuthors(TextRenderer tr, float x, float y, float scale) {
+    tr.RenderText("  Igor Nunes", x, y                                         , scale);
+    tr.RenderText("Diogo Simoes", x, y + 1.f * scale * (tr.getFontSize() + 5.f), scale);
 }
 
 

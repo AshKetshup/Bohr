@@ -39,16 +39,16 @@ public:
 
 private:
     typedef struct {
-        int  num;
-        char symbol[3];
-        char name[14];
-        int  empirical;
-        int  calculated;
-        int  vanderWalls;
-        int  covalent1;
-        int  covalent3;
+        int  num;           // Número atómico
+        char symbol[3];     // Símbolo atómico
+        char name[14];      // Nome ISO
+        int  empirical;     // Raio empírico
+        int  calculated;    // Raio calculado matematicamente
+        int  vanderWalls;   // Raio de van der Walls
+        int  covalent1;     // Raio de covalência em ligação simples
+        int  covalent3;     // Raio de covalência em ligação tripla
         int  metallic;
-        AtomColor color;
+        AtomColor color;    // Cor CPK
     } Element;
 
     static constexpr Element PERIODIC_TABLE[NUM_ELEMENTS] = {

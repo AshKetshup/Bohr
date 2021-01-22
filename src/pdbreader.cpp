@@ -57,9 +57,10 @@ bool Molecule::generateSpheres(void) {
 }
 
 
-void Molecule::render_vanderWalls(Shader shader, Camera camera, const int SCR_WIDTH, const int SCR_HEIGHT, float roty, float rotz) const {
+void Molecule::render_vanderWalls(Shader shader, Camera camera, const int SCR_WIDTH, const int SCR_HEIGHT, float rotx, float roty) const {
     glm::vec3 lightColor  = glm::vec3(1.0f, 1.0f, 1.0f);
     glm::vec3 lightPos    = camera.Position;
+    glm::vec3 viewPos     = camera.Position;
     // glm::vec3 molPos      = glm::vec3((this->min.x + this->max.x) / 2.f, (this->min.y + this->max.y) / 2.f, (this->min.z + this->max.z) / 2.f);
 
     shader.use();
@@ -68,6 +69,7 @@ void Molecule::render_vanderWalls(Shader shader, Camera camera, const int SCR_WI
         shader.setVec3("objectColor",     this->spheres[i].color);
         shader.setVec3("lamp.lightColor", lightColor);
         shader.setVec3("lamp.lightPos",   lightPos);
+        shader.setVec3("lamp.viewPos",    viewPos);
         
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -79,8 +81,8 @@ void Molecule::render_vanderWalls(Shader shader, Camera camera, const int SCR_WI
         // world transformation
         glm::mat4 model = glm::mat4(1.0f);
         glm::vec3 trans = this->atoms[i].center.toVec3();
-        model = glm::rotate(model, glm::radians(roty), glm::vec3(1.f, 0.f, 0.f));
-        model = glm::rotate(model, glm::radians(rotz), glm::vec3(0.f, 1.f, 0.f));
+        model = glm::rotate(model, glm::radians(rotx), glm::vec3(1.f, 0.f, 0.f));
+        model = glm::rotate(model, glm::radians(roty), glm::vec3(0.f, 1.f, 0.f));
         model = glm::translate(model, trans);
         model = glm::scale(model, glm::vec3(1.0f));
         shader.setMat4("model", model);

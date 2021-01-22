@@ -33,11 +33,11 @@ public:
     vector<Atom> atoms;
     Point min, max;
     string toString();
-    Molecule fromPDB(char *file);
+    Molecule fromPDB(const char *file);
     Camera resetCamera();
     void render_vanderWalls(Shader, Camera, const int, const int, float = 0.f, float = 0.f) const;
 };
 
-int getMoleculeFromPDB(char*, Molecule&);
+int getMoleculeFromPDB(const char*, Molecule&);
 
 #endif

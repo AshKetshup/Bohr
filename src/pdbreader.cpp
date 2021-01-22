@@ -6,7 +6,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <sstream>
 
-int getMoleculeFromPDB(char *file, Molecule &molecule) { 
+int getMoleculeFromPDB(const char *file, Molecule &molecule) { 
     FILE *fp;
     Atom atom;
     char line[85];
@@ -39,7 +39,7 @@ int getMoleculeFromPDB(char *file, Molecule &molecule) {
 }
 
 
-Molecule Molecule::fromPDB(char *file) {
+Molecule Molecule::fromPDB(const char *file) {
     this->atoms.clear();
     this->spheres.clear();
     getMoleculeFromPDB(file, *this);

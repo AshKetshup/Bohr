@@ -34,19 +34,19 @@ typedef enum {
     OPEN_FILE
 } action;
 
-GLFWwindow* initialize_glfw(int width, int height, const char* title);
+GLFWwindow* initialize_glfw(int, int, const char*);
 int initialize_glad(void);
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void mousebtn_callback(GLFWwindow* window, int button, int action, int mods);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-action processInput(GLFWwindow *window, char **fname);
+void framebuffer_size_callback(GLFWwindow*, int, int);
+void mouse_callback(GLFWwindow*, double, double);
+void mousebtn_callback(GLFWwindow*, int, int, int);
+void scroll_callback(GLFWwindow*, double, double);
+action processInput(GLFWwindow*, string&);
 
 char *openPDBFileDialog(void);
-bool isPBD(char *);
+bool isPDB(char *);
 
-void switchModeView(GLFWwindow* window, bool mode);
+void switchModeView(GLFWwindow*, bool);
 void writeInstructions(TextRenderer, float, float, float);
 void writeAuthors(TextRenderer, float, float, float);
 void writeText(TextRenderer, string, float, float, float);
@@ -103,7 +103,7 @@ int main(int argc, char const *argv[]) {
         std::cerr << e.what() << '\n';
     }
 
-    char *fname = NULL;
+    string fname;
     Molecule molecule;
 
     float currentFrame;
@@ -118,25 +118,11 @@ int main(int argc, char const *argv[]) {
 
             writeInstructions(textrenderer, 10.f, 10.f, 0.6f);
             writeAuthors(textrenderer, 1470.f, SCR_HEIGHT - 2.f * textrenderer.getFontSize(), 0.75f);
-            writeText(textrenderer, (fname != NULL) ? std::experimental::filesystem::path(fname).filename() : "No file opened", 10.f, SCR_HEIGHT - textrenderer.getFontSize(), 0.8f);
+            writeText(textrenderer, !fname.empty() ? std::experimental::filesystem::path(fname).filename() : "No file opened", 10.f, SCR_HEIGHT - textrenderer.getFontSize(), 0.8f);
 
-            switch (processInput(window, &fname)) {
+            switch (processInput(window, fname)) {
                 case action::OPEN_FILE:
-                    if (fname != NULL) {
-                        if (isPBD(fname)) {
-                            cout << "Reading molecule from \"" << fname << "\"..." << endl;
-                            molecule = Molecule().fromPDB(fname);
-                            camera = molecule.resetCamera();
-                            debug("\n%s\n", molecule.toString().data());
-                        } else {
-                            cout << "This is not a valid PDB file." << endl;
-                            osdialog_message(OSDIALOG_ERROR, OSDIALOG_OK, "This is not a valid PDB file.");
-                        }
-                    } else {
-                        cout << "No file was selected." << endl;
-                        osdialog_message(OSDIALOG_INFO, OSDIALOG_OK, "No file was selected.");
-                    }
-                    // if (fname != NULL) free(fname);
+                    molecule.fromPDB(fname.data());
                     break;
                 
                 case action::CAMERA_RESET:
@@ -160,8 +146,6 @@ int main(int argc, char const *argv[]) {
             std::cerr << "I dunno :(" << endl;
         }
     }
-
-    if (fname != NULL) free(fname);
 
     glfwTerminate();
     
@@ -225,7 +209,7 @@ void writeText(TextRenderer tr, string text, float x, float y, float scale) {
 }
 
 
-action processInput(GLFWwindow *window, char **fname) {
+action processInput(GLFWwindow *window, string &fname) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     
@@ -252,10 +236,23 @@ action processInput(GLFWwindow *window, char **fname) {
     
     if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
         switchModeView(window, false);
-        if (*fname != NULL) free(*fname);
-        *fname = openPDBFileDialog();
+        char *newfile = openPDBFileDialog();
+        if (newfile != NULL) {
+            if (isPDB(newfile)) {
+                fname = string(newfile);
+                free(newfile);
+                switchModeView(window, true);
+                return action::OPEN_FILE;
+            } else {
+                cout << "This is not a valid PDB file." << endl;
+                osdialog_message(OSDIALOG_ERROR, OSDIALOG_OK, "This is not a valid PDB file.");
+                switchModeView(window, true);
+                free(newfile);
+                return action::NO_ACTION;
+            }
+        }
         switchModeView(window, true);
-        return (*fname != NULL) ? action::OPEN_FILE : action::NO_ACTION;
+        return action::NO_ACTION;
     }
 
     return action::NO_ACTION;
@@ -267,7 +264,7 @@ char *openPDBFileDialog(void) {
 }
 
 
-bool isPBD(char *fname) {
+bool isPDB(char *fname) {
     return string(std::experimental::filesystem::path(fname).extension()).compare(".pdb") == 0;
 }
 

@@ -1,5 +1,6 @@
 #include "sism.h"
 #include "filesys.h"
+#include "glslcode.h"
 
 namespace callback {
     structur::Bohr* instance = nullptr;
@@ -294,15 +295,11 @@ Bohr::Bohr(const unsigned int width, const unsigned int height) {
         debugs("Lauching Bohr...\n");
         debugs("\tSetting relevant directories... ");
         std::experimental::filesystem::path appPath(filesys::getAppPath());
-        this->appDir    = appPath.parent_path(); // std::experimental::filesystem::current_path();
-        this->appName   = appPath.filename();    //"bohr";
+        this->appDir    = appPath.parent_path();
+        this->appName   = appPath.filename();
         this->shaderDir = appDir + "/shaders";
         this->fontDir   = appDir + "/fonts";
         this->fontName  = "UbuntuMono-R.ttf";
-        // debugs("\n\t\t    App directory: %s\n", this->appDir.c_str());
-        // debugs("\t\t         App name: %s\n", this->appName.c_str());
-        // debugs("\t\tShaders directory: %s\n", this->shaderDir.c_str());
-        // debugs("\t\t   Font directory: %s\n", this->fontDir.c_str());
 
         debugs("[OK]\n\tInitializing GLFW and GLAD... ");
         this->scr_width   = width;
@@ -314,10 +311,17 @@ Bohr::Bohr(const unsigned int width, const unsigned int height) {
             throw BohrException("Failed to initialize GLAD");
         glEnable(GL_DEPTH_TEST);
 
+        debugs("[OK]\n\tAuto-checking shaders... ");
+        debugs("(corrected %d shaders) ", autoCorrectShaders(this->shaderDir));
+
         debugs("[OK]\n\tLoading shaders... ");
-        this->shaderMolecule = Shader((this->shaderDir + "/lighting_vs.glsl").c_str(), (this->shaderDir + "/lighting_fs.glsl").c_str());
-        this->shaderFont     = Shader((this->shaderDir + "/font_vs.glsl").c_str(), (this->shaderDir + "/font_fs.glsl").c_str());
-        this->camera         = Camera(glm::vec3(0.0f, 0.0f, 0.0f));
+        this->shaderMolecule = Shader((this->shaderDir + "/" + MOLECULE_VS).c_str(), (this->shaderDir + "/" + MOLECULE_FS).c_str());
+        if (!this->shaderMolecule.wasSuccessful())
+            throw BohrException("Molecule: " + this->shaderMolecule.getReport());
+        this->shaderFont     = Shader((this->shaderDir + "/" + FONT_VS).c_str(), (this->shaderDir + "/" + FONT_FS).c_str());
+        if (!this->shaderFont.wasSuccessful())
+            throw BohrException("Font: " + this->shaderFont.getReport());
+        this->camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f));
 
         debugs("[OK]\n\tLoading text renderer... ");
         this->textRender = TextRenderer(this->scr_width, this->scr_height, this->shaderFont);

@@ -9,6 +9,39 @@
 #include <sstream>
 #include <iostream>
 
+#define SHADER_VERTEX       0b00000001
+#define SHADER_FRAGMENT     0b00000010
+#define SHADER_GEOMETRY     0b00000100
+#define SHADER_PROGRAM      0b00001000
+
+#define TYPE_READING        0b00100000
+#define TYPE_COMPILATION    0b01000000
+#define TYPE_LINKING        0b10000000
+
+class ShaderReport {
+public:
+    ShaderReport(void) : error(0), message("") {}
+    ShaderReport(const int err, const std::string msg) : error(err), message(msg) {}
+    void setReport(const int err, const std::string msg) { error = err; message = msg; }
+    bool success(void) { return error == 0; }
+    const std::string what() const throw () {
+        std::string log("");
+        if (error & TYPE_READING)       log += "Could not read ";
+        if (error & TYPE_COMPILATION)   log += "Compilation on ";
+        if (error & TYPE_LINKING)       log += "Linking on ";
+        if (error & SHADER_VERTEX)      log += "vertex shader ";
+        if (error & SHADER_FRAGMENT)    log += "fragment shader ";
+        if (error & SHADER_GEOMETRY)    log += "geometry shader ";
+        if (error & SHADER_PROGRAM)     log += "shader program ";
+        log += "(message: " + message + ").";
+        return log;
+    }
+private:
+    int error;
+    std::string message;
+};
+
+
 class Shader
 {
 public:
@@ -19,6 +52,7 @@ public:
     Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr)
     {
         // 0. Define the path of the shader
+        this->report         = ShaderReport();
         this->vertexShader   = std::string(vertexPath);
         this->fragmentShader = std::string(fragmentPath);
         this->geometryShader = std::string((geometryPath != nullptr) ? geometryPath : "");
@@ -30,53 +64,64 @@ public:
         std::ifstream vShaderFile;
         std::ifstream fShaderFile;
         std::ifstream gShaderFile;
+
         // ensure ifstream objects can throw exceptions:
         vShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
         fShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
         gShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
-        try 
-        {
-            // open files
+
+        try {
             vShaderFile.open(vertexPath);
-            fShaderFile.open(fragmentPath);
-            std::stringstream vShaderStream, fShaderStream;
-            // read file's buffer contents into streams
+            std::stringstream vShaderStream;
             vShaderStream << vShaderFile.rdbuf();
-            fShaderStream << fShaderFile.rdbuf();		
-            // close file handlers
             vShaderFile.close();
-            fShaderFile.close();
-            // convert stream into string
             vertexCode = vShaderStream.str();
-            fragmentCode = fShaderStream.str();			
-            // if geometry shader path is present, also load a geometry shader
-            if(geometryPath != nullptr)
-            {
+        } catch (std::ifstream::failure& e) {
+            report.setReport(TYPE_READING | SHADER_VERTEX, std::string(e.what()));
+            return;
+        }
+
+        try {
+            fShaderFile.open(fragmentPath);
+            std::stringstream fShaderStream;
+            fShaderStream << fShaderFile.rdbuf();
+            fShaderFile.close();
+            fragmentCode = fShaderStream.str();
+        } catch (std::ifstream::failure& e) {
+            report.setReport(TYPE_READING | SHADER_FRAGMENT, std::string(e.what()));
+            return;
+        }
+
+        if (geometryPath != nullptr) {
+            try {
                 gShaderFile.open(geometryPath);
                 std::stringstream gShaderStream;
                 gShaderStream << gShaderFile.rdbuf();
                 gShaderFile.close();
                 geometryCode = gShaderStream.str();
+            } catch (std::ifstream::failure& e) {
+                report.setReport(TYPE_READING | SHADER_GEOMETRY, std::string(e.what()));
+                return;
             }
         }
-        catch (std::ifstream::failure& e)
-        {
-            std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
-        }
+
         const char* vShaderCode = vertexCode.c_str();
-        const char * fShaderCode = fragmentCode.c_str();
+        const char* fShaderCode = fragmentCode.c_str();
+
         // 2. compile shaders
         unsigned int vertex, fragment;
         // vertex shader
         vertex = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vertex, 1, &vShaderCode, NULL);
         glCompileShader(vertex);
-        checkCompileErrors(vertex, "VERTEX");
+        if (!checkCompileErrors(vertex, SHADER_VERTEX)) return;
+        
         // fragment Shader
         fragment = glCreateShader(GL_FRAGMENT_SHADER);
         glShaderSource(fragment, 1, &fShaderCode, NULL);
         glCompileShader(fragment);
-        checkCompileErrors(fragment, "FRAGMENT");
+        if (!checkCompileErrors(fragment, SHADER_FRAGMENT)) return;
+        
         // if geometry shader is given, compile geometry shader
         unsigned int geometry;
         if(geometryPath != nullptr)
@@ -85,7 +130,7 @@ public:
             geometry = glCreateShader(GL_GEOMETRY_SHADER);
             glShaderSource(geometry, 1, &gShaderCode, NULL);
             glCompileShader(geometry);
-            checkCompileErrors(geometry, "GEOMETRY");
+            if (!checkCompileErrors(geometry, SHADER_GEOMETRY)) return;
         }
         // shader Program
         ID = glCreateProgram();
@@ -94,13 +139,12 @@ public:
         if(geometryPath != nullptr)
             glAttachShader(ID, geometry);
         glLinkProgram(ID);
-        checkCompileErrors(ID, "PROGRAM");
+        if (!checkCompileErrors(ID, SHADER_PROGRAM)) return;
         // delete the shaders as they're linked into our program now and no longer necessery
         glDeleteShader(vertex);
         glDeleteShader(fragment);
         if(geometryPath != nullptr)
             glDeleteShader(geometry);
-
     }
     // activate the shader
     // ------------------------------------------------------------------------
@@ -179,35 +223,45 @@ public:
         return this->geometryShader;
     }
 
+    bool wasSuccessful(void) {
+        return this->report.success();
+    }
+
+    std::string getReport(void) {
+        return this->report.what();
+    }
+
+    ShaderReport getReportHandler(void) {
+        return this->report;
+    }
+
 private:
     std::string vertexShader;
     std::string fragmentShader;
     std::string geometryShader;
+    ShaderReport report;
 
     // utility function for checking shader compilation/linking errors.
     // ------------------------------------------------------------------------
-    void checkCompileErrors(GLuint shader, std::string type)
-    {
+    bool checkCompileErrors(GLuint shader, const int type) {
         GLint success;
         GLchar infoLog[1024];
-        if(type != "PROGRAM")
-        {
+        if (!(type & SHADER_PROGRAM)) {
             glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-            if(!success)
-            {
+            if (!success) {
                 glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-                std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+                report.setReport(TYPE_COMPILATION | type, std::string(infoLog));
+                return false;
             }
-        }
-        else
-        {
+        } else {
             glGetProgramiv(shader, GL_LINK_STATUS, &success);
-            if(!success)
-            {
+            if (!success) {
                 glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-                std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+                report.setReport(TYPE_LINKING | type, std::string(infoLog));
+                return false;
             }
         }
+        return true;
     }
 };
 #endif

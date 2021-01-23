@@ -4,18 +4,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/*
-#define release(...)                                                      \
-    do {                                                                  \
-        fprintf(stdout, __VA_ARGS__);                                     \
-    } while(0)
-*/
-
 #ifndef NDEBUG
 
 #define debug(...)                                                        \
     do {                                                                  \
         fprintf(stderr, "%s:%d: %s(): ", __FILE__, __LINE__, __func__);   \
+        fprintf(stderr, __VA_ARGS__);                                     \
+    } while(0)
+
+#define debugs(...)                                                       \
+    do {                                                                  \
         fprintf(stderr, __VA_ARGS__);                                     \
     } while(0)
 
@@ -32,6 +30,7 @@
 #else
 
 #define debug(...) 
+#define debugs(...) 
 #define expects(...)
 #define ensures(...)
 

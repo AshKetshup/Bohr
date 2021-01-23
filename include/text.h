@@ -22,9 +22,10 @@ public:
     // holds a list of pre-compiled Characters
     std::map<char, Character> Characters;
     // shader used for text rendering
-    Shader TextShader = Shader("shaders/font_vs.glsl", "shaders/font_fs.glsl");
+    // Shader TextShader = Shader("shaders/font_vs.glsl", "shaders/font_fs.glsl");
     // constructor
-    TextRenderer(unsigned int width, unsigned int height);
+    TextRenderer();
+    TextRenderer(unsigned int width, unsigned int height, Shader shader);
     // pre-compiles a list of characters from the given font
     void Load(std::string font, unsigned int fontSize);
     // renders a string of text using the precompiled list of characters
@@ -33,10 +34,17 @@ public:
     void WriteText(std::ostringstream *text, float x, float y, float scale, glm::vec3 color = glm::vec3(1.0f));
 
     unsigned int getFontSize();
+    Shader getShader();
+    void setShader(Shader);
+    std::string getFont();
+    void setFont(std::string);
+
 private:
     // render state
     unsigned int fontSize;
     unsigned int VAO, VBO;
+    Shader TextShader;
+    std::string TextFont;
 };
 
 #endif

@@ -11,6 +11,7 @@
 #include "pdbreader.hpp"
 #include "osdialog.h"
 #include "text.h"
+#include "logo.h"
 #include "debug.h"
 
 #include <string>
@@ -56,10 +57,15 @@ namespace structur {
         string shaderDir;
         Shader shaderFont;
         Shader shaderMolecule;
+        Shader shaderLogo;
         
         string fontDir;
         string fontName;
         TextRenderer textRender;
+
+        string resDir;
+        string logoName;
+        Logo logo;
 
         GLFWwindow* window;
         unsigned int scr_width;
@@ -114,6 +120,7 @@ namespace structur {
         void main(void);
         Bohr(void);
         Bohr(const unsigned int, const unsigned int);
+        ~Bohr(void);
     };
 }
 

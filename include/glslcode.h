@@ -1,3 +1,17 @@
+//------------------------------------------------------------------------------
+//
+// Bohr - Very Small PDB Molecular Visualizer
+//
+// RUNTIME LIBRARIES PACKAGE
+//    glslcode.h
+//
+// DESCRIPTION:
+// -----------
+// Contains the shaders hard-coded in order to provide a failsafe option in case
+// of the original files being missing.
+// 
+//------------------------------------------------------------------------------
+
 #ifndef GLSLCODE_H
 #define GLSLCODE_H
 
@@ -91,22 +105,32 @@ const char font_vertex_shader[] =
     "    TexCoords = vertex.zw;\n"
     "}";
 
-#define VERTEX      0b00000001
-#define FRAGMENT    0b00000010
-#define GEOMETRY    0b00000100     // for future use
-#define MOLECULE    0b01000000
-#define FONT        0b10000000
+#define VERTEX      0b00000001              // Vertex shader
+#define FRAGMENT    0b00000010              // Fragment shader
+#define GEOMETRY    0b00000100              // Geometry shader (for future use)
+#define MOLECULE    0b01000000              // Molecule shaders
+#define FONT        0b10000000              // Font shaders
 
-#define MOLECULE_FS "lighting_fs.glsl"
-#define MOLECULE_VS "lighting_vs.glsl"
-#define FONT_FS     "font_fs.glsl"
-#define FONT_VS     "font_vs.glsl"
+#define MOLECULE_FS "lighting_fs.glsl"      // Molecule fragment shader file name
+#define MOLECULE_VS "lighting_vs.glsl"      // Molecule vertex shader file name
+#define FONT_FS     "font_fs.glsl"          // Font fragment shader file name
+#define FONT_VS     "font_vs.glsl"          // Font vertex shader file name
+#define LOGO_FS     "logo_fs.glsl"          // Logo fragment shader file name
+#define LOGO_VS     "logo_vs.glsl"          // Logo vertex shader file name
 
 #include <string>
 
+// Gets name of shader from the int code
 std::string nameOfShader(int);
+
+// Checks if a given shader exists
 bool shaderExists(std::string);
+
+// Creates the shader, if not available, given the int code
 bool createShader(std::string, int);
+
+// Proceeds to automatically check and create missing shaders.
+// Returns the number of shaders that were missing and were successfully corrected.
 int autoCorrectShaders(std::string);
 
 #endif

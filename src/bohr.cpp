@@ -18,11 +18,8 @@ using namespace structur;
 
 int main(int argc, char const *argv[]) {
     Bohr bohr(SCR_WIDTH, SCR_HEIGHT);
-    if (!bohr.launchSuccessful()) {
-        bohr.terminate();
+    if (!bohr.launchSuccessful())
         return -1;
-    }
     bohr.main();
-    bohr.terminate();
     return 0;
 }

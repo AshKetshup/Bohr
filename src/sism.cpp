@@ -249,6 +249,10 @@ void Bohr::refresh(void) {
     this->deltaTime = this->currentFrame - this->lastFrame;
     this->lastFrame = this->currentFrame;
 
+    if (this->fname.empty()) {
+        this->logo.render(this->scr_width, this->scr_height);
+    }
+
     writeInstructions(this->getTextRenderer(), 10.f, 10.f, 0.6f);
     writeAuthors(this->getTextRenderer(), 1470.f, this->scr_height - 2.f * this->getTextRenderer().getFontSize(), 0.75f);
     writeText(this->getTextRenderer(), !this->fname.empty() ? std::experimental::filesystem::path(this->fname).filename() : "No file opened", 10.f, this->scr_height - this->getTextRenderer().getFontSize(), 0.8f);
@@ -256,14 +260,13 @@ void Bohr::refresh(void) {
     switch (this->processInput()) {
         case action::OPEN_FILE:
             this->molecule.fromPDB(fname.data());
-            this->camera = this->molecule.resetCamera();
             break;
         
         case action::CAMERA_RESET:
             this->camera = this->molecule.resetCamera();
             this->molrotx = 0.f;
             this->molroty = 0.f;
-            cout << "Camera position reseted." << endl;
+            debugs("Camera position reseted.\n");
             break;
 
         default:
@@ -299,7 +302,9 @@ Bohr::Bohr(const unsigned int width, const unsigned int height) {
         this->appName   = appPath.filename();
         this->shaderDir = appDir + "/shaders";
         this->fontDir   = appDir + "/fonts";
+        this->resDir    = appDir + "/res";
         this->fontName  = "UbuntuMono-R.ttf";
+        this->logoName  = "bohr.bmp";
 
         debugs("[OK]\n\tInitializing GLFW and GLAD... ");
         this->scr_width   = width;
@@ -318,14 +323,25 @@ Bohr::Bohr(const unsigned int width, const unsigned int height) {
         this->shaderMolecule = Shader((this->shaderDir + "/" + MOLECULE_VS).c_str(), (this->shaderDir + "/" + MOLECULE_FS).c_str());
         if (!this->shaderMolecule.wasSuccessful())
             throw BohrException("Molecule: " + this->shaderMolecule.getReport());
+        
         this->shaderFont     = Shader((this->shaderDir + "/" + FONT_VS).c_str(), (this->shaderDir + "/" + FONT_FS).c_str());
         if (!this->shaderFont.wasSuccessful())
             throw BohrException("Font: " + this->shaderFont.getReport());
+        
+        this->shaderLogo     = Shader((this->shaderDir + "/" + LOGO_VS).c_str(), (this->shaderDir + "/" + LOGO_FS).c_str());
+        if (!this->shaderLogo.wasSuccessful())
+            throw BohrException("Logo: " + this->shaderLogo.getReport());
+
         this->camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f));
 
         debugs("[OK]\n\tLoading text renderer... ");
         this->textRender = TextRenderer(this->scr_width, this->scr_height, this->shaderFont);
         this->textRender.Load(this->getFont(), 24);
+
+        debugs("[OK]\n\tLoading logo... ");
+        this->logo = Logo((this->resDir + "/" + this->logoName).c_str(), this->shaderLogo);
+        if (!this->logo.wasSuccessful())
+            throw BohrException("Failed to load logo");
 
         debugs("[OK]\n");
         debugs("Done.\n\n");
@@ -338,4 +354,8 @@ Bohr::Bohr(const unsigned int width, const unsigned int height) {
         cout << "Abort launch!" << endl;
         this->success = false;
     }
+}
+
+Bohr::~Bohr(void) {
+    this->terminate();
 }

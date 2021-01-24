@@ -1,3 +1,19 @@
+//------------------------------------------------------------------------------
+//
+// Bohr - Very Small PDB Molecular Visualizer
+//
+// RUNTIME LIBRARIES PACKAGE
+//    filesys.h
+//
+// DESCRIPTION:
+// -----------
+// Provides cross-platform methods to get the application directory.
+// 
+// FROM:
+// -----
+// Stack Overflow
+//------------------------------------------------------------------------------
+
 #ifndef FILESYS_H
 #define FILESYS_H
 
@@ -50,6 +66,7 @@ namespace filesys {
         #error provide your own implementation
     #endif
 
+    // Wraps the getExecutablePathName() function in order to provide a simpler method
     std::string getAppPath(void) {
         char *path = (char *) malloc(256 * sizeof(char));
         getExecutablePathName(path, 256);

@@ -249,7 +249,7 @@ void Bohr::refresh(void) {
     this->deltaTime = this->currentFrame - this->lastFrame;
     this->lastFrame = this->currentFrame;
 
-    if (this->fname.empty()) {
+    if (this->logo.isAvailable() && this->fname.empty()) {
         this->logo.render(this->scr_width, this->scr_height);
     }
 
@@ -340,8 +340,8 @@ Bohr::Bohr(const unsigned int width, const unsigned int height) {
 
         debugs("[OK]\n\tLoading logo... ");
         this->logo = Logo((this->resDir + "/" + this->logoName).c_str(), this->shaderLogo);
-        if (!this->logo.wasSuccessful())
-            throw BohrException("Failed to load logo");
+        // if (!this->logo.wasSuccessful())
+        //     throw BohrException("Failed to load logo");
 
         debugs("[OK]\n");
         debugs("Done.\n\n");

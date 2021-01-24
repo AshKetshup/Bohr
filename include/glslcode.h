@@ -105,11 +105,44 @@ const char font_vertex_shader[] =
     "    TexCoords = vertex.zw;\n"
     "}";
 
+const char logo_vertex_shader[] =
+    "#version 330 core\n"
+    "layout (location = 0) in vec3 aPos;\n"
+    "layout (location = 1) in vec3 aColor;\n"
+    "layout (location = 2) in vec2 aTexCoord;\n"
+    "\n"
+    "uniform mat4 projection;\n"
+    "\n"
+    "out vec3 ourColor;\n"
+    "out vec2 TexCoord;\n"
+    "\n"
+    "void main()\n"
+    "{\n"
+    "    gl_Position = projection * vec4(aPos, 1.0);\n"
+    "    ourColor = aColor;\n"
+    "    TexCoord = vec2(aTexCoord.x, aTexCoord.y);\n"
+    "}";
+
+const char logo_fragment_shader[] =
+    "#version 330 core\n"
+    "out vec4 FragColor;\n"
+    "\n"
+    "in vec3 ourColor;\n"
+    "in vec2 TexCoord;\n"
+    "\n"
+    "uniform sampler2D ourTexture;\n"
+    "\n"
+    "void main()\n"
+    "{\n"
+    "    FragColor = texture(ourTexture, TexCoord);\n"
+    "}";
+
 #define VERTEX      0b00000001              // Vertex shader
 #define FRAGMENT    0b00000010              // Fragment shader
 #define GEOMETRY    0b00000100              // Geometry shader (for future use)
-#define MOLECULE    0b01000000              // Molecule shaders
-#define FONT        0b10000000              // Font shaders
+#define MOLECULE    0b00100000              // Molecule shaders
+#define FONT        0b01000000              // Font shaders
+#define LOGO        0b10000000              // Logo shaders
 
 #define MOLECULE_FS "lighting_fs.glsl"      // Molecule fragment shader file name
 #define MOLECULE_VS "lighting_vs.glsl"      // Molecule vertex shader file name

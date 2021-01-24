@@ -68,6 +68,10 @@ bool Logo::wasSuccessful(void) {
     return this->success;
 }
 
+bool Logo::isAvailable(void) {
+    return this->success;
+}
+
 void Logo::render(unsigned int width, unsigned int height) {
     float size = static_cast<float>((width < height) ? width : height);
     glActiveTexture(GL_TEXTURE0);

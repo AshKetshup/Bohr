@@ -7,10 +7,12 @@ namespace fs = std::experimental::filesystem;
 using namespace std;
 
 string nameOfShader(int code) {
-    if (code & (MOLECULE | VERTEX  ))  return string(MOLECULE_VS);
-    if (code & (MOLECULE | FRAGMENT))  return string(MOLECULE_FS);
-    if (code & (FONT     | VERTEX  ))  return string(FONT_VS);
-    if (code & (FONT     | FRAGMENT))  return string(FONT_FS);
+    if (code & (MOLECULE | VERTEX  ))  return MOLECULE_VS;
+    if (code & (MOLECULE | FRAGMENT))  return MOLECULE_FS;
+    if (code & (FONT     | VERTEX  ))  return FONT_VS;
+    if (code & (FONT     | FRAGMENT))  return FONT_FS;
+    if (code & (LOGO     | VERTEX  ))  return LOGO_VS;
+    if (code & (LOGO     | FRAGMENT))  return LOGO_FS;
 }
 
 bool shaderExists(string path) {
@@ -38,6 +40,14 @@ bool createShader(string path, int code) {
                 shader << font_fragment_shader;
                 break;
             
+            case LOGO | VERTEX:
+                shader << logo_vertex_shader;
+                break;
+            
+            case LOGO | FRAGMENT:
+                shader << logo_fragment_shader;
+                break;
+            
             default:
                 shader.close();
                 return false;
@@ -48,10 +58,12 @@ bool createShader(string path, int code) {
 }
 
 int autoCorrectShaders(string path) {
-    int result = 0;
-    result += (int) !createShader(path, MOLECULE | VERTEX  );
-    result += (int) !createShader(path, MOLECULE | FRAGMENT);
-    result += (int) !createShader(path, FONT     | VERTEX  );
-    result += (int) !createShader(path, FONT     | FRAGMENT);
-    return result;
+    int c = 0;      // Number of corrected shaders
+    c += (int) !createShader(path, MOLECULE | VERTEX  );
+    c += (int) !createShader(path, MOLECULE | FRAGMENT);
+    c += (int) !createShader(path, FONT     | VERTEX  );
+    c += (int) !createShader(path, FONT     | FRAGMENT);
+    c += (int) !createShader(path, LOGO     | VERTEX  );
+    c += (int) !createShader(path, LOGO     | FRAGMENT);
+    return c;
 }

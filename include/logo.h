@@ -31,6 +31,7 @@ private:
     void load(const char*);
 public:
     bool wasSuccessful();
+    bool isAvailable();
     void render(unsigned int, unsigned int);
     Logo(const char*, Shader);
     Logo() {};

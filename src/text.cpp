@@ -6,9 +6,11 @@
 
 #include "text.h"
 
+TextRenderer::TextRenderer(void) {}
 
-TextRenderer::TextRenderer(unsigned int width, unsigned int height) {
+TextRenderer::TextRenderer(unsigned int width, unsigned int height, Shader shader) {
 	// load and configure shader
+	this->setShader(shader);
 	this->TextShader.use();
 	this->TextShader.setMat4("projection", glm::ortho(0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f));
 	this->TextShader.setInt("text", 0);
@@ -29,6 +31,7 @@ void TextRenderer::Load(std::string font, unsigned int fontSize) {
 	glEnable(GL_CULL_FACE);
 	// first clear the previously loaded Characters
 	this->Characters.clear();
+	this->TextFont = font;
     this->fontSize = fontSize;
 	// then initialize and load the FreeType library
 	FT_Library ft;
@@ -145,7 +148,22 @@ void TextRenderer::WriteText(std::ostringstream *text, float x, float y, float s
 	text->str("");
 }
 
-
 unsigned int TextRenderer::getFontSize(void) {
     return this->fontSize;
+}
+
+Shader TextRenderer::getShader(void) {
+	return this->TextShader;
+}
+
+void TextRenderer::setShader(Shader shader) {
+	this->TextShader = shader;
+}
+
+std::string TextRenderer::getFont() {
+	return this->TextFont;
+}
+
+void TextRenderer::setFont(std::string font) {
+	this->TextFont = font;
 }

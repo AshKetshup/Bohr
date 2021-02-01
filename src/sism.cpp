@@ -298,13 +298,15 @@ Bohr::Bohr(const unsigned int width, const unsigned int height) {
         debugs("Lauching Bohr...\n");
         debugs("\tSetting relevant directories... ");
         std::experimental::filesystem::path appPath(filesys::getAppPath());
-        this->appDir    = appPath.parent_path();
-        this->appName   = appPath.filename();
-        this->shaderDir = appDir + "/shaders";
-        this->fontDir   = appDir + "/fonts";
-        this->resDir    = appDir + "/res";
-        this->fontName  = "UbuntuMono-R.ttf";
-        this->logoName  = "bohr.bmp";
+        this->appDir     = appPath.parent_path();
+        this->appName    = appPath.filename();
+        this->shaderDir  = appDir + "/shaders";
+        this->fontDir    = appDir + "/fonts";
+        this->resDir     = appDir + "/res";
+        this->fontName   = "UbuntuMono-R.ttf";
+        this->logoName   = "bohr.bmp";
+        this->optionName = "optionsBohr.bmp";
+        this->symbolName = "symbolBohr.bmp";
 
         debugs("[OK]\n\tInitializing GLFW and GLAD... ");
         this->scr_width   = width;

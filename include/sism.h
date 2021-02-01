@@ -65,6 +65,8 @@ namespace structur {
 
         string resDir;
         string logoName;
+        string optionName;
+        string symbolName;
         Logo logo;
 
         GLFWwindow* window;

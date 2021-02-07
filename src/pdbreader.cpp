@@ -1,4 +1,4 @@
-#include "pdbreader.hpp"
+#include "pdbreader.h"
 #include "ptable.h"
 #include <stdio.h>
 #include <string.h>
@@ -42,8 +42,10 @@ int getMoleculeFromPDB(const char *file, Molecule &molecule) {
 Molecule Molecule::fromPDB(const char *file) {
     this->atoms.clear();
     this->spheres.clear();
+    this->pisurf.reset();
     getMoleculeFromPDB(file, *this);
     this->generateSpheres();
+    this->generatePiSurface(0.5f);
     return *this;
 }
 
@@ -54,6 +56,19 @@ bool Molecule::generateSpheres(void) {
         this->spheres.push_back(VBOSphere(atom.radius, 50, 50, PeriodicTable::getColorFromSymbol(atom.name).toVec3()));
     }
     return true;
+}
+
+
+void Molecule::setBlendingParam(float w) {
+    this->pisurf.setBlendingParam(w);
+}
+
+
+void Molecule::generatePiSurface(float blendingParam) {
+    this->pisurf = PiSurface(blendingParam);
+    for (auto a : this->atoms) {
+        this->pisurf.addSphere(Sphere(a.center.x, a.center.y, a.center.z, a.radius));
+    }
 }
 
 

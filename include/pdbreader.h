@@ -4,6 +4,7 @@
 #include "shader_m.h"
 #include "camera.h"
 #include "vbosphere.h"
+#include "pisurf.h"
 #include <glm/glm.hpp>
 #include <vector>
 #include <string>
@@ -28,13 +29,16 @@ public:
 class Molecule {
 private:
     vector<VBOSphere> spheres;
+    PiSurface pisurf;
     bool generateSpheres();
+    void generatePiSurface(float);
 public:
     vector<Atom> atoms;
     Point min, max;
     string toString();
     Molecule fromPDB(const char *file);
     Camera resetCamera();
+    void setBlendingParam(float);
     void render_vanderWalls(Shader, Camera, const int, const int, float = 0.f, float = 0.f) const;
 };
 

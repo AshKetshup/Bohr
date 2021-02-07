@@ -8,7 +8,7 @@
 
 #include "shader_m.h"
 #include "camera.h"
-#include "pdbreader.hpp"
+#include "pdbreader.h"
 #include "osdialog.h"
 #include "text.h"
 #include "logo.h"

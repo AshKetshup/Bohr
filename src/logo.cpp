@@ -81,6 +81,7 @@ void Logo::render(unsigned int width, unsigned int height) {
     this->shader.setMat4("projection", glm::ortho(-1.0f, 1.0f, static_cast<float>(height) / static_cast<float>(width), -static_cast<float>(height) / static_cast<float>(width)));
     glBindVertexArray(this->VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    // glDisable(GL_TEXTURE0);
     glUseProgram(0);
 }
 

@@ -23,10 +23,14 @@ MarchingCubes::MarchingCubes(void) {}
 
 
 void MarchingCubes::render() const {
-    glEnable(GL_DEPTH_TEST);
+    // glEnable(GL_BLEND);
+    // glBlendFunc(GL_ONE, GL_ZERO);
+    // glDepthFunc(GL_NEVER);
     glBindVertexArray(vaoHandle);
     glDrawArrays(GL_TRIANGLES, 0, vertices.size());
-    glBindVertexArray(0);
+    // glDepthFunc(GL_LESS);
+    // glBindVertexArray(0);
+    // glDisable(GL_BLEND);
 }
 
 
@@ -50,9 +54,7 @@ void MarchingCubes::generate(PiSurface p, Point3D min, Point3D max, float maxRad
     for (float x = floor1(min.x - maxRadius); x < ceil1(max.x + maxRadius); x += step) {
         for (float y = floor1(min.y - maxRadius); y < ceil1(max.y + maxRadius); y += step) {
             for (float z = floor1(min.z - maxRadius); z < ceil1(max.z + maxRadius); z += step) {
-                // debugs("(%6.2f, %6.2f, %6.2f) ", x, y, z);
                 this->generate_single(p, {x, y, z}, step);
-                // debugs("\n");
                 c++;
             }
         }
@@ -60,8 +62,6 @@ void MarchingCubes::generate(PiSurface p, Point3D min, Point3D max, float maxRad
 
 
     debugs("\tGot %ld points (i.e. %ld triangles) from %lld cubes.\n", vertices.size(), vertices.size() / 3, c);
-
-    // for (int i = 0; i < vertices.size(); i += 3) { debugs("(%6.3f, %6.3f, %6.3f)\n", vertices[i], vertices[i+1], vertices[i+2]); }
 
     unsigned int handle[2];
     glGenBuffers(2, handle);
@@ -96,9 +96,7 @@ void MarchingCubes::generate_single(PiSurface surf, Point3D point, float step) {
             point.z + step * a2fVertexOffset[i][2],
         };
         grid[i].val = surf.getValueAt(grid[i].point);
-        // debugs("%6.2f; ", grid[i].val);
     }
-    // debugs("\n");
 
     GLint cubeIndex = 0b00000000;
     float w = surf.getBlendingParam();
@@ -108,12 +106,11 @@ void MarchingCubes::generate_single(PiSurface surf, Point3D point, float step) {
     }
 
     GLint edgeFlags = aiCubeEdgeFlags[cubeIndex];
-    // std::cerr << "\t" << std::bitset<8>(cubeIndex) << "\t" << std::bitset<12>(edgeFlags);
     if (edgeFlags == 0) return;
 
 
     Point3D edgeVert[12];
-    // Point3D edgeNorm[12];
+    Point3D edgeNorm[12];
     GLfloat fOffset = step / 2.f;
     for (int edge = 0; edge < 12; edge++) {
         if (edgeFlags & (1 << edge)) {
@@ -121,19 +118,11 @@ void MarchingCubes::generate_single(PiSurface surf, Point3D point, float step) {
             edgeVert[edge].x = point.x + (a2fVertexOffset[a2iEdgeConnection[edge][0]][0] + fOffset * a2fEdgeDirection[edge][0]) * step;
             edgeVert[edge].y = point.y + (a2fVertexOffset[a2iEdgeConnection[edge][0]][1] + fOffset * a2fEdgeDirection[edge][1]) * step;
             edgeVert[edge].z = point.z + (a2fVertexOffset[a2iEdgeConnection[edge][0]][2] + fOffset * a2fEdgeDirection[edge][2]) * step;
-            // debugs(" (%.3f, %.3f, %.3f)", edgeVert[edge].x, edgeVert[edge].y, edgeVert[edge].z);
-            // edgeNorm[edge] = getNormal(surf, edgeVert[edge].x, edgeVert[edge].y, edgeVert[edge].z);
-
-            // edgeVert[edge].x = point.x + (a2fVertexOffset[a2iEdgeConnection[edge][0]][0] + a2fEdgeDirection[edge][0]) * step;
-            // edgeVert[edge].y = point.y + (a2fVertexOffset[a2iEdgeConnection[edge][0]][1] + a2fEdgeDirection[edge][1]) * step;
-            // edgeVert[edge].z = point.z + (a2fVertexOffset[a2iEdgeConnection[edge][0]][2] + a2fEdgeDirection[edge][2]) * step;
+            edgeNorm[edge] = getNormal(surf, edgeVert[edge].x, edgeVert[edge].y, edgeVert[edge].z);
         }
     }
 
     GLint ivertex;
-    Point3D triVert[3];
-    Vector3D triNorm;
-
     for (int t = 0; t < 5; t++) {
         if (a2iTriangleConnectionTable[cubeIndex][3*t] < 0)
             break;
@@ -143,16 +132,9 @@ void MarchingCubes::generate_single(PiSurface surf, Point3D point, float step) {
             this->vertices.push_back(edgeVert[ivertex].x);
             this->vertices.push_back(edgeVert[ivertex].y);
             this->vertices.push_back(edgeVert[ivertex].z);
-            // this->normals.push_back(edgeNorm[ivertex].x);
-            // this->normals.push_back(edgeNorm[ivertex].y);
-            // this->normals.push_back(edgeNorm[ivertex].z);
-            triVert[c] = edgeVert[ivertex];
-        }
-        triNorm = getNormal(triVert[0], triVert[1], triVert[2]);
-        for (int c = 0; c < 3; c++) {
-            this->normals.push_back(triNorm.x);
-            this->normals.push_back(triNorm.y);
-            this->normals.push_back(triNorm.z);
+            this->normals.push_back(edgeNorm[ivertex].x);
+            this->normals.push_back(edgeNorm[ivertex].y);
+            this->normals.push_back(edgeNorm[ivertex].z);
         }
     }
 }
@@ -165,16 +147,12 @@ GLfloat MarchingCubes::getOffset(GLfloat fValue1, GLfloat fValue2, GLfloat fValu
     return (fValueDesired - fValue1) / fDelta;
 }
 
-GLfloat MarchingCubes::getClassicOffset(GLfloat a, GLfloat b, GLfloat step) {
-     
-}
-
 
 Point3D MarchingCubes::getNormal(PiSurface& surf, GLfloat x, GLfloat y, GLfloat z) {
     Point3D rfNormal = {-0.1f, 0.1f, 0.0f};
-    // rfNormal.x = surf.getValueAt(x-0.01f, y, z) - surf.getValueAt(x+0.01f, y, z);
-    // rfNormal.y = surf.getValueAt(x, y-0.01f, z) - surf.getValueAt(x, y+0.01f, z);
-    // rfNormal.z = surf.getValueAt(x, y, z-0.01f) - surf.getValueAt(x, y, z+0.01f);
+    rfNormal.x = surf.getValueAt(x-0.01f, y, z) - surf.getValueAt(x+0.01f, y, z);
+    rfNormal.y = surf.getValueAt(x, y-0.01f, z) - surf.getValueAt(x, y+0.01f, z);
+    rfNormal.z = surf.getValueAt(x, y, z-0.01f) - surf.getValueAt(x, y, z+0.01f);
     normalizeVector(rfNormal, rfNormal);
     return rfNormal;
 }

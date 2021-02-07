@@ -2,7 +2,7 @@
 out vec4 FragColor;
 
 in vec3 Normal;  
-in vec3 FragPos;  
+in vec3 FragPos;
 
 struct Lamp {
     vec3 lightPos;

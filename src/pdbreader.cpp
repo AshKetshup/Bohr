@@ -138,16 +138,16 @@ void Molecule::render_piSurface(Shader shader, Camera camera, const int SCR_WIDT
     shader.setMat4("view", view);
 
     glm::mat4 model = glm::mat4(1.0f);
-    glm::vec3 trans = glm::vec3(0.f);
+    // glm::vec3 trans = glm::vec3(0.f);
     model = glm::rotate(model, glm::radians(rotx), glm::vec3(1.f, 0.f, 0.f));
     model = glm::rotate(model, glm::radians(roty), glm::vec3(0.f, 1.f, 0.f));
-    model = glm::translate(model, trans);
+    // model = glm::translate(model, trans);
     model = glm::scale(model, glm::vec3(1.0f));
     shader.setMat4("model", model);
 
     this->mcubes.render();
 
-    glUseProgram(0);
+    // glUseProgram(0);
 }
 
 

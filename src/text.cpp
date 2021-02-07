@@ -139,7 +139,8 @@ void TextRenderer::RenderText(std::string text, float x, float y, float scale, g
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glUseProgram(0);
 	glDisable(GL_TEXTURE0);
-	glDisable(GL_BLEND);	
+	glBlendFunc(GL_ONE, GL_ZERO);
+	glDisable(GL_BLEND);
 }
 
 void TextRenderer::WriteText(std::ostringstream *text, float x, float y, float scale, glm::vec3 color) {

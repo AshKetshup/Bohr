@@ -89,11 +89,9 @@ float PiSurface::getValueAt(float x, float y, float z, float padding) {
 
 float PiSurface::getValueAt(Point3D p, float padding) {
     float res = 1.f;
-    float e;
     for (auto s : this->spheres) {
         if (s.pointInCube(p)) {
-            e = s.getValueAt(p);
-            res *= e - sqr(s.getRadius());
+            res *= s.getValueAt(p) - sqr(s.getRadius());
         }
     }
     return res; // - this->w;

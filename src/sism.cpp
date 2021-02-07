@@ -75,8 +75,8 @@ const char* BohrException::what(void) const throw () { return message.c_str(); }
 
 bool Bohr::initialize_glfw(int width, int height, const char* title) {
     glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     
 #ifdef __APPLE__
@@ -95,6 +95,7 @@ bool Bohr::initialize_glfw(int width, int height, const char* title) {
     this->setScrollCallback(callback::scroll_callback);
 
     glfwSetInputMode(this->window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
     return true;
 }
 
@@ -251,6 +252,9 @@ TextRenderer Bohr::getTextRenderer(void) {
 void Bohr::refresh(void) {
     callback::bindInstance(this);
 
+    glEnable(GL_DEPTH_TEST);
+
+    glDepthMask(GL_TRUE);
     glClearColor(0.f, 0.f, 51.f / 255.f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

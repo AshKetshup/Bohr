@@ -29,6 +29,11 @@ namespace structur {
         OPEN_FILE
     } action;
 
+    typedef enum {
+        VANDERWALLS,
+        PISURFACE
+    } render_mode;
+
     typedef struct {
         float lastX;
         float lastY;
@@ -66,6 +71,9 @@ namespace structur {
         string resDir;
         string logoName;
         Logo logo;
+
+        render_mode rmode = VANDERWALLS;
+        bool w_was_pressed = false;
 
         GLFWwindow* window;
         unsigned int scr_width;

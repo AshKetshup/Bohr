@@ -6,6 +6,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <sstream>
 
+#include "debug.h"
+
 int getMoleculeFromPDB(const char *file, Molecule &molecule) { 
     FILE *fp;
     Atom atom;
@@ -30,6 +32,7 @@ int getMoleculeFromPDB(const char *file, Molecule &molecule) {
             molecule.max.z = (na == 1) ? (atom.center.z) : (atom.center.z > molecule.max.z ? atom.center.z : molecule.max.z);
             sscanf(&line[76], "%s", &atom.name[0]);
             atom.radius = PeriodicTable::getVanDerWallsRadiusFromSymbol(atom.name) / 100.0f;
+            molecule.maxRadius = (na == 1) ? (atom.radius) : (atom.radius > molecule.maxRadius ? atom.radius : molecule.maxRadius);
             molecule.atoms.push_back(atom);
         }
     }
@@ -65,10 +68,18 @@ void Molecule::setBlendingParam(float w) {
 
 
 void Molecule::generatePiSurface(float blendingParam) {
+    debugs("Generating Pi Surface...\n");
     this->pisurf = PiSurface(blendingParam);
     for (auto a : this->atoms) {
         this->pisurf.addSphere(Sphere(a.center.x, a.center.y, a.center.z, a.radius));
     }
+    debugs("Pi Surface is done with %ld spheres!\n", pisurf.spheres.size());
+    for (auto s : pisurf.spheres) {
+        debugs("\t(%.2f, %.2f, %.2f) r = %.2f\n", s.c.x, s.c.y, s.c.z, s.getRadius());
+    }
+    debugs("Calculating Marching Cubes...\n");
+    this->mcubes.generate(this->pisurf, {this->min.x, this->min.y, this->min.z}, {this->max.x, this->max.y, this->max.z});
+    debugs("Marching Cubes are done!\n");
 }
 
 
@@ -104,6 +115,39 @@ void Molecule::render_vanderWalls(Shader shader, Camera camera, const int SCR_WI
 
         this->spheres[i].render();
     }
+}
+
+
+void Molecule::render_piSurface(Shader shader, Camera camera, const int SCR_WIDTH, const int SCR_HEIGHT, float rotx, float roty) const {
+    glm::vec3 lightColor  = glm::vec3(1.0f, 1.0f, 1.0f);
+    glm::vec3 lightPos    = camera.Position;
+    glm::vec3 viewPos     = camera.Position;
+    glm::vec3 objectColor = glm::vec3(221.f / 255.f, 119.f / 255.f, 255.f / 255.f);
+
+    shader.use();
+
+    shader.setVec3("objectColor",     objectColor);
+    shader.setVec3("lamp.lightColor", lightColor);
+    shader.setVec3("lamp.lightPos",   lightPos);
+    shader.setVec3("lamp.viewPos",    viewPos);
+
+    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+    glm::mat4 view = camera.GetViewMatrix();
+
+    shader.setMat4("projection", projection);
+    shader.setMat4("view", view);
+
+    glm::mat4 model = glm::mat4(1.0f);
+    glm::vec3 trans = glm::vec3(0.f);
+    model = glm::rotate(model, glm::radians(rotx), glm::vec3(1.f, 0.f, 0.f));
+    model = glm::rotate(model, glm::radians(roty), glm::vec3(0.f, 1.f, 0.f));
+    model = glm::translate(model, trans);
+    model = glm::scale(model, glm::vec3(1.0f));
+    shader.setMat4("model", model);
+
+    this->mcubes.render();
+
+    glUseProgram(0);
 }
 
 

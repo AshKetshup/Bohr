@@ -56,7 +56,8 @@ void structur::writeInstructions(TextRenderer tr, float x, float y, float scale)
     tr.RenderText("       [WASD] Move camera"    , x, y + 1.f * scale * (tr.getFontSize() + 5.f), scale);
     tr.RenderText("[Arrows,2468] Rotate molecule", x, y + 2.f * scale * (tr.getFontSize() + 5.f), scale);
     tr.RenderText("      [Mouse] Rotate camera"  , x, y + 3.f * scale * (tr.getFontSize() + 5.f), scale);
-    tr.RenderText("     [ESC, Q] Exit"           , x, y + 4.f * scale * (tr.getFontSize() + 5.f), scale);
+    tr.RenderText("          [M] Switch view"    , x, y + 4.f * scale * (tr.getFontSize() + 5.f), scale);
+    tr.RenderText("     [ESC, Q] Exit"           , x, y + 5.f * scale * (tr.getFontSize() + 5.f), scale);
 }
 
 
@@ -122,6 +123,14 @@ action Bohr::processInput(void) {
         this->molroty += 1.f;
     if (glfwGetKey(this->window, GLFW_KEY_RIGHT) == GLFW_PRESS || glfwGetKey(this->window, GLFW_KEY_6) == GLFW_PRESS)
         this->molroty -= 1.f;
+    
+    if (glfwGetKey(this->window, GLFW_KEY_M) == GLFW_PRESS) {
+        if (!w_was_pressed)
+            this->rmode = (this->rmode == VANDERWALLS) ? PISURFACE : VANDERWALLS;
+        w_was_pressed = true;
+    } else {
+        w_was_pressed = false;
+    }
     
     if (glfwGetKey(this->window, GLFW_KEY_R) == GLFW_PRESS)
         return action::CAMERA_RESET;
@@ -260,6 +269,7 @@ void Bohr::refresh(void) {
     switch (this->processInput()) {
         case action::OPEN_FILE:
             this->molecule.fromPDB(fname.data());
+            debugs("%s\n", molecule.toString().c_str());
             break;
         
         case action::CAMERA_RESET:
@@ -273,7 +283,14 @@ void Bohr::refresh(void) {
             break;
     }
 
-    this->molecule.render_vanderWalls(this->shaderMolecule, this->camera, this->scr_width, this->scr_height, this->molrotx, this->molroty);
+    switch (this->rmode) {
+        case PISURFACE:
+            this->molecule.render_piSurface(this->shaderMolecule, this->camera, this->scr_width, this->scr_height, this->molrotx, this->molroty);
+            break;
+        case VANDERWALLS:
+        default:
+            this->molecule.render_vanderWalls(this->shaderMolecule, this->camera, this->scr_width, this->scr_height, this->molrotx, this->molroty);
+    }
 
     glfwSwapBuffers(this->window);
     glfwPollEvents();
@@ -314,7 +331,6 @@ Bohr::Bohr(const unsigned int width, const unsigned int height) {
             throw BohrException("Failed to create the window");
         if (!this->initialize_glad())
             throw BohrException("Failed to initialize GLAD");
-        glEnable(GL_DEPTH_TEST);
 
         debugs("[OK]\n\tAuto-checking shaders... ");
         debugs("(corrected %d shaders) ", autoCorrectShaders(this->shaderDir));

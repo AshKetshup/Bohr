@@ -68,18 +68,18 @@ void Molecule::setBlendingParam(float w) {
 
 
 void Molecule::generatePiSurface(float blendingParam) {
-    debugs("Generating Pi Surface...\n");
+    debugs("\tGenerating Pi Surface... ");
     this->pisurf = PiSurface(blendingParam);
     for (auto a : this->atoms) {
         this->pisurf.addSphere(Sphere(a.center.x, a.center.y, a.center.z, a.radius));
     }
-    debugs("Pi Surface is done with %ld spheres!\n", pisurf.spheres.size());
-    for (auto s : pisurf.spheres) {
-        debugs("\t(%.2f, %.2f, %.2f) r = %.2f\n", s.c.x, s.c.y, s.c.z, s.getRadius());
-    }
-    debugs("Calculating Marching Cubes...\n");
+    debugs("[OK]\n");
+    // for (auto s : pisurf.spheres) {
+    //     debugs("\t(%.2f, %.2f, %.2f) r = %.2f\n", s.c.x, s.c.y, s.c.z, s.getRadius());
+    // }
+    debugs("\tComputing Marching Cubes... ");
     this->mcubes.generate(this->pisurf, {this->min.x, this->min.y, this->min.z}, {this->max.x, this->max.y, this->max.z});
-    debugs("Marching Cubes are done!\n");
+    debugs("[OK]\n");
 }
 
 

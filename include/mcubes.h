@@ -12,6 +12,7 @@ class MarchingCubes {
 public:
     MarchingCubes();
     void generate(PiSurface, Point3D, Point3D, float = 3.50f);
+    void generate_single(vector<GLfloat>&, vector<GLfloat>&, PiSurface, Point3D, float = 0.2f);
     void render() const;
 
 private:
@@ -24,12 +25,13 @@ private:
     vector<GLfloat> vertices;
     vector<GLfloat> normals;
 
+    // void foo(MarchingCubes, PiSurface, Point3D, Point3D, float, float, int, int, vector<GLfloat>, vector<GLfloat>);
+
     GLfloat getOffset(GLfloat, GLfloat, GLfloat);
     Vector3D getNormal(PiSurface&, GLfloat, GLfloat, GLfloat, int);
     Vector3D getNormal(Point3D, Point3D, Point3D);
     GLvoid normalizeVector(Vector3D&, Vector3D&);
 
-    void generate_single(PiSurface, Point3D, float = 0.2f);
 
     static constexpr GLfloat a2fVertexOffset[8][3] = {
         {0.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {1.0, 1.0, 0.0}, {0.0, 1.0, 0.0},

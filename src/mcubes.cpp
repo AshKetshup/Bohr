@@ -4,6 +4,9 @@
 #include "debug.h"
 #include <iostream>
 #include <bitset>
+#include <thread>
+
+using namespace std;
 
 inline double ceil1(double x) {
     if (x >= 0.0)
@@ -23,19 +26,32 @@ MarchingCubes::MarchingCubes(void) {}
 
 
 void MarchingCubes::render() const {
-    // glEnable(GL_BLEND);
-    // glBlendFunc(GL_ONE, GL_ZERO);
-    // glDepthFunc(GL_GREATER);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glBindVertexArray(vaoHandle);
     glDrawArrays(GL_TRIANGLES, 0, vertices.size());
-
-    glDisable(GL_POLYGON_OFFSET_FILL);
-    // glDepthFunc(GL_LESS);
-    // glBindVertexArray(0);
-    // glDisable(GL_BLEND);
+    // glDisable(GL_POLYGON_OFFSET_FILL);
 }
+
+// void MarchingCubes::foo(MarchingCubes _m, PiSurface _p, Point3D min, Point3D max, float maxRadius, float step, int th_curr, int th_lim, vector<GLfloat> _v, vector<GLfloat> _n) {
+//     MarchingCubes &m   = const_cast<MarchingCubes&>(_m);
+//     PiSurface &p       = const_cast<PiSurface&>(_p);
+//     vector<GLfloat> &v = const_cast<vector<GLfloat>&>(_v);
+//     vector<GLfloat> &n = const_cast<vector<GLfloat>&>(_n);
+// 
+//     float z0 = floor1(min.z - maxRadius);
+//     float z1 = ceil1(max.z + maxRadius);
+//     float zs = z1 - z0;
+//     float zi = z0 + (zs / th_lim * th_curr);
+//     float zf = z0 + (zs / th_lim * (th_curr + 1));
+// 
+//     for (float z = zi; z < zf; z += step) {
+//         for (float x = floor1(min.x - maxRadius); x < ceil1(max.x + maxRadius); x += step) {
+//             for (float y = floor1(min.y - maxRadius); y < ceil1(max.y + maxRadius); y += step) {
+//                 m.generate_single(v, n, p, {x, y, z}, step);
+//             }
+//         }
+//     }
+// };
 
 
 void MarchingCubes::generate(PiSurface p, Point3D min, Point3D max, float maxRadius) {
@@ -49,23 +65,56 @@ void MarchingCubes::generate(PiSurface p, Point3D min, Point3D max, float maxRad
     };
     float step = 0.2f;
 
-    debugs("\tMesh size: {%.2f, %.2f, %.2f}\n", mesh_size.x, mesh_size.y, mesh_size.z);
-    debugs("\tx = %.2lf to %.2lf step %.2f\n", floor1(min.x - maxRadius), ceil1(max.x + maxRadius), step);
-    debugs("\ty = %.2lf to %.2lf step %.2f\n", floor1(min.y - maxRadius), ceil1(max.y + maxRadius), step);
-    debugs("\tz = %.2lf to %.2lf step %.2f\n", floor1(min.z - maxRadius), ceil1(max.z + maxRadius), step);
+    // debugs("\tMesh size: {%.2f, %.2f, %.2f}\n", mesh_size.x, mesh_size.y, mesh_size.z);
+    // debugs("\tx = %.2lf to %.2lf step %.2f\n", floor1(min.x - maxRadius), ceil1(max.x + maxRadius), step);
+    // debugs("\ty = %.2lf to %.2lf step %.2f\n", floor1(min.y - maxRadius), ceil1(max.y + maxRadius), step);
+    // debugs("\tz = %.2lf to %.2lf step %.2f\n", floor1(min.z - maxRadius), ceil1(max.z + maxRadius), step);
 
-    unsigned long long c = 0;
+    // auto f = [](MarchingCubes &m, PiSurface &p, Point3D min, Point3D max, float maxRadius, float step, int th_curr, int th_lim, vector<GLfloat> &v, vector<GLfloat> &n) {
+    //     float z0 = floor1(min.z - maxRadius);
+    //     float z1 = ceil1(max.z + maxRadius);
+    //     float zs = z1 - z0;
+    //     float zi = z0 + (zs / th_lim * th_curr);
+    //     float zf = z0 + (zs / th_lim * (th_curr + 1));
+    // 
+    //     for (float z = zi; z < zf; z += step) {
+    //         for (float x = floor1(min.x - maxRadius); x < ceil1(max.x + maxRadius); x += step) {
+    //             for (float y = floor1(min.y - maxRadius); y < ceil1(max.y + maxRadius); y += step) {
+    //                 m.generate_single(v, n, p, {x, y, z}, step);
+    //             }
+    //         }
+    //     }
+    // };
+
+    // unsigned concurrency = thread::hardware_concurrency();
+    // unsigned const c = (concurrency == 0) ? 1 : concurrency;
+    // thread th[c];
+    // vector<GLfloat> vert[c];
+    // vector<GLfloat> norm[c];
+
+    // for (int i = 0; i < c; i++) {
+    //     th[i] = thread(&MarchingCubes::foo, this, std::ref(p), min, max, maxRadius, step, i, c, std::ref(vert[c]), std::ref(norm[c]));
+    //     debugs("\tStarted thread #%d\n", i);
+    // }
+    // for (int i = 0; i < c; i++) {
+    //     th[i].join();
+    //     debugs("\tFinished thread #%d\n", i);
+    // }
+
+    // for (int i = 0; i < c; i++) {
+    //     this->vertices.insert(vertices.end(), vert[c].begin(), vert[c].end());
+    //     this->normals.insert(normals.end(), norm[c].begin(), norm[c].end());
+    // }
+
     for (float z = floor1(min.z - maxRadius); z < ceil1(max.z + maxRadius); z += step) {
         for (float x = floor1(min.x - maxRadius); x < ceil1(max.x + maxRadius); x += step) {
             for (float y = floor1(min.y - maxRadius); y < ceil1(max.y + maxRadius); y += step) {
-                this->generate_single(p, {x, y, z}, step);
-                c++;
+                this->generate_single(vertices, normals, p, {x, y, z}, step);
             }
         }
     }
-
-
-    debugs("\tGot %ld points (i.e. %ld triangles) from %lld cubes.\n", vertices.size(), vertices.size() / 3, c);
+    
+    // debugs("\tGot %ld points (i.e. %ld triangles) from %lld cubes.\n", vertices.size(), vertices.size() / 3, c);
 
     float *v = new float[vertices.size()];
     float *n = new float[normals.size()];
@@ -89,10 +138,10 @@ void MarchingCubes::generate(PiSurface p, Point3D min, Point3D max, float maxRad
     glGenBuffers(2, handle);
 
     glBindBuffer(GL_ARRAY_BUFFER, handle[0]);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &v[0] /*&vertices[0]*/, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &v[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, handle[1]);
-    glBufferData(GL_ARRAY_BUFFER, normals.size()  * sizeof(GLfloat), &n[0] /*&normals[0]*/, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, normals.size()  * sizeof(GLfloat), &n[0], GL_STATIC_DRAW);
 
     glGenVertexArrays(1, &vaoHandle);
     glBindVertexArray(vaoHandle);
@@ -112,7 +161,7 @@ void MarchingCubes::generate(PiSurface p, Point3D min, Point3D max, float maxRad
 }
 
 
-void MarchingCubes::generate_single(PiSurface surf, Point3D point, float step) {
+void MarchingCubes::generate_single(vector<GLfloat> &v, vector<GLfloat> &n, PiSurface surf, Point3D point, float step) {
     float w = surf.getBlendingParam();
     
     Grid grid[8];
@@ -159,28 +208,39 @@ void MarchingCubes::generate_single(PiSurface surf, Point3D point, float step) {
         
         for (int c = 0; c < 3; c++) {
             ivertex = a2iTriangleConnectionTable[cubeIndex][3*t+c];
-            this->vertices.push_back(edgeVert[ivertex].x);
-            this->vertices.push_back(edgeVert[ivertex].y);
-            this->vertices.push_back(edgeVert[ivertex].z);
+            // this->vertices.push_back(edgeVert[ivertex].x);
+            // this->vertices.push_back(edgeVert[ivertex].y);
+            // this->vertices.push_back(edgeVert[ivertex].z);
+            v.push_back(edgeVert[ivertex].x);
+            v.push_back(edgeVert[ivertex].y);
+            v.push_back(edgeVert[ivertex].z);
             
             if (edgeNorm[ivertex] == (Vector3D){0.f, 0.f, 0.f}) {
                 wasZero += 1;
                 lastVert[c] = edgeVert[ivertex];
             }
 
-            this->normals.push_back(edgeNorm[ivertex].x);
-            this->normals.push_back(edgeNorm[ivertex].y);
-            this->normals.push_back(edgeNorm[ivertex].z);
+            // this->normals.push_back(edgeNorm[ivertex].x);
+            // this->normals.push_back(edgeNorm[ivertex].y);
+            // this->normals.push_back(edgeNorm[ivertex].z);
+            n.push_back(edgeNorm[ivertex].x);
+            n.push_back(edgeNorm[ivertex].y);
+            n.push_back(edgeNorm[ivertex].z);
         }
 
         if (wasZero == 3) {
-            for (int c = 0; c < 9; c++)
-                this->normals.pop_back();
+            for (int c = 0; c < 9; c++){
+                // this->normals.pop_back();
+                n.pop_back();
+            }
             specialNorm = getNormal(lastVert[0], lastVert[1], lastVert[2]);
             for (int c = 0; c < 3; c++) {
-                this->normals.push_back(specialNorm.x);
-                this->normals.push_back(specialNorm.y);
-                this->normals.push_back(specialNorm.z);
+                // this->normals.push_back(specialNorm.x);
+                // this->normals.push_back(specialNorm.y);
+                // this->normals.push_back(specialNorm.z);
+                n.push_back(specialNorm.x);
+                n.push_back(specialNorm.y);
+                n.push_back(specialNorm.z);
             }
         }
     }

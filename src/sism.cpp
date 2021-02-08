@@ -272,6 +272,8 @@ void Bohr::refresh(void) {
 
     switch (this->processInput()) {
         case action::OPEN_FILE:
+            // writeText(this->getTextRenderer(), "Generating molecule...", 10.f, this->scr_height - this->getTextRenderer().getFontSize() * 2, 0.8f);
+            // glfwSwapBuffers(this->window);
             this->molecule.fromPDB(fname.data());
             debugs("%s\n", molecule.toString().c_str());
             break;

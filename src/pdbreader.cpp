@@ -118,11 +118,11 @@ void Molecule::render_vanderWalls(Shader shader, Camera camera, const int SCR_WI
 }
 
 
-void Molecule::render_piSurface(Shader shader, Camera camera, const int SCR_WIDTH, const int SCR_HEIGHT, float rotx, float roty) const {
+void Molecule::render_piSurface(Shader shader, Camera camera, const int SCR_WIDTH, const int SCR_HEIGHT, glm::vec3 objectColor, float rotx, float roty) const {
     glm::vec3 lightColor  = glm::vec3(1.0f, 1.0f, 1.0f);
     glm::vec3 lightPos    = camera.Position;
     glm::vec3 viewPos     = camera.Position;
-    glm::vec3 objectColor = glm::vec3(221.f / 255.f, 119.f / 255.f, 255.f / 255.f);
+    // glm::vec3 objectColor = glm::vec3(221.f / 255.f, 119.f / 255.f, 255.f / 255.f);
 
     shader.use();
 

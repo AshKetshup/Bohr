@@ -192,6 +192,7 @@ char* osdialog_file(osdialog_file_action action, const char* path, const char* f
 	return osdialog_strdup(outBuf);
 }
 
+#include "debug.h"
 
 int osdialog_color_picker(osdialog_color* color, int opacity) {
 	char* args[32];
@@ -204,8 +205,20 @@ int osdialog_color_picker(osdialog_color* color, int opacity) {
 	args[argIndex++] = osdialog_strdup("--color-selection");
 
 	args[argIndex++] = NULL;
-	int ret = string_list_exec(zenityBin, (const char* const*) args, NULL, 0, NULL, 0);
+
+	char outBuf[16 + 1];
+	// char errBuf[4096 + 1];
+	int ret = string_list_exec(zenityBin, (const char* const*) args, outBuf, sizeof(outBuf), NULL, 0);
 	string_list_clear(args);
-	// TODO
-	return 0;
+	// debugs("outBuf: \"%s\"\n", outBuf);
+	// std::cout << "errBuf: \"" << errBuf << "\"" << std::endl;
+	int r, g, b;
+	sscanf(outBuf, "rgb(%d,%d,%d) ", &r, &g, &b);
+	color->r = (uint8_t)r;
+	color->g = (uint8_t)g;
+	color->b = (uint8_t)b;
+	color->a = (uint8_t)255;
+	// debugs("Got: (%d, %d, %d)\n", (int)color->r, (int)color->g, (int)color->b);
+
+	return ret;
 }

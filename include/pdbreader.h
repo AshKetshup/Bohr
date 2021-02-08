@@ -42,7 +42,7 @@ public:
     Camera resetCamera();
     void setBlendingParam(float);
     void render_vanderWalls(Shader, Camera, const int, const int, float = 0.f, float = 0.f) const;
-    void render_piSurface(Shader, Camera, const int, const int, float = 0.f, float = 0.f) const;
+    void render_piSurface(Shader, Camera, const int, const int, glm::vec3 = glm::vec3(221.f / 255.f, 119.f / 255.f, 255.f / 255.f), float = 0.f, float = 0.f) const;
 };
 
 int getMoleculeFromPDB(const char*, Molecule&);

@@ -26,7 +26,8 @@ namespace structur {
     typedef enum {
         NO_ACTION,
         CAMERA_RESET,
-        OPEN_FILE
+        OPEN_FILE,
+        CHANGE_COLOR
     } action;
 
     typedef enum {
@@ -54,6 +55,7 @@ namespace structur {
 
     class Bohr {
     private:
+        static constexpr glm::vec3 PISURF_DEFAULT_COLOR = glm::vec3(221.f / 255.f, 119.f / 255.f, 255.f / 255.f);
         bool success = false;
 
         string appDir;
@@ -64,6 +66,8 @@ namespace structur {
         Shader shaderMolecule;
         Shader shaderPiSurf;
         Shader shaderLogo;
+
+        glm::vec3 pisurfColor = PISURF_DEFAULT_COLOR;
         
         string fontDir;
         string fontName;
@@ -108,6 +112,7 @@ namespace structur {
         bool getModeView(void);
         void switchModeView(bool);
         static char *openPDBFileDialog(void);
+        static int selectColorDialog(osdialog_color*);
         static bool isPDB(char*);
         void setFrameBufferSizeCallback(GLFWframebuffersizefun);
         void setMouseButtonCallback(GLFWmousebuttonfun);

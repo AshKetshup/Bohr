@@ -52,12 +52,15 @@ namespace callback {
 using namespace structur;
 
 void structur::writeInstructions(TextRenderer tr, float x, float y, float scale) {
-    tr.RenderText("          [O] Open File"      , x, y                                         , scale);
-    tr.RenderText("       [WASD] Move camera"    , x, y + 1.f * scale * (tr.getFontSize() + 5.f), scale);
-    tr.RenderText("[Arrows,2468] Rotate molecule", x, y + 2.f * scale * (tr.getFontSize() + 5.f), scale);
-    tr.RenderText("      [Mouse] Rotate camera"  , x, y + 3.f * scale * (tr.getFontSize() + 5.f), scale);
-    tr.RenderText("          [M] Switch view"    , x, y + 4.f * scale * (tr.getFontSize() + 5.f), scale);
-    tr.RenderText("     [ESC, Q] Exit"           , x, y + 5.f * scale * (tr.getFontSize() + 5.f), scale);
+    tr.RenderText("          [O] Open File"            , x, y                                         , scale);
+    tr.RenderText("       [WASD] Move camera"          , x, y + 1.f * scale * (tr.getFontSize() + 5.f), scale);
+    tr.RenderText("[Arrows,2468] Rotate molecule"      , x, y + 2.f * scale * (tr.getFontSize() + 5.f), scale);
+    tr.RenderText("          [M] Switch view"          , x, y + 3.f * scale * (tr.getFontSize() + 5.f), scale);
+    tr.RenderText("          [C] Change surface color" , x, y + 4.f * scale * (tr.getFontSize() + 5.f), scale);
+    tr.RenderText("          [X] Reset surface color"  , x, y + 5.f * scale * (tr.getFontSize() + 5.f), scale);
+    tr.RenderText("      [Mouse] Rotate camera"        , x, y + 6.f * scale * (tr.getFontSize() + 5.f), scale);
+    tr.RenderText("[Mouse wheel] Zoom"                 , x, y + 7.f * scale * (tr.getFontSize() + 5.f), scale);
+    tr.RenderText("     [ESC, Q] Exit"                 , x, y + 8.f * scale * (tr.getFontSize() + 5.f), scale);
 }
 
 
@@ -144,6 +147,7 @@ action Bohr::processInput(void) {
                 this->fname = string(newfile);
                 free(newfile);
                 switchModeView(true);
+                this->pisurfColor = PISURF_DEFAULT_COLOR;
                 return action::OPEN_FILE;
             } else {
                 cout << "This is not a valid PDB file." << endl;
@@ -155,6 +159,24 @@ action Bohr::processInput(void) {
         }
         switchModeView(true);
         return action::NO_ACTION;
+    }
+
+    if (glfwGetKey(this->window, GLFW_KEY_C) == GLFW_PRESS) {
+        switchModeView(false);
+        osdialog_color color;
+        int ret = selectColorDialog(&color);
+        // debugs("Color: (%d, %d, %d, %d); ret = %d\n", (int)color.r, (int)color.g, (int)color.b, (int)color.a, ret);
+        if (ret == 0) {
+            this->pisurfColor = glm::vec3((int)color.r / 255.f, (int)color.g / 255.f, (int)color.b / 255.f);
+            switchModeView(true);
+            return action::CHANGE_COLOR;
+        }
+        switchModeView(true);
+        return action::NO_ACTION;
+    }
+
+    if (glfwGetKey(this->window, GLFW_KEY_X) == GLFW_PRESS) {
+        this->pisurfColor = PISURF_DEFAULT_COLOR;
     }
 
     return action::NO_ACTION;
@@ -183,6 +205,10 @@ void Bohr::switchModeView(bool mode) {
 
 char * Bohr::openPDBFileDialog(void) {
     return osdialog_file(OSDIALOG_OPEN, NULL, NULL, NULL);
+}
+
+int Bohr::selectColorDialog(osdialog_color* color) {
+    return osdialog_color_picker(color, 1);
 }
 
 bool Bohr::isPDB(char *fname) {
@@ -272,8 +298,6 @@ void Bohr::refresh(void) {
 
     switch (this->processInput()) {
         case action::OPEN_FILE:
-            // writeText(this->getTextRenderer(), "Generating molecule...", 10.f, this->scr_height - this->getTextRenderer().getFontSize() * 2, 0.8f);
-            // glfwSwapBuffers(this->window);
             this->molecule.fromPDB(fname.data());
             debugs("%s\n", molecule.toString().c_str());
             break;
@@ -284,6 +308,10 @@ void Bohr::refresh(void) {
             this->molroty = 0.f;
             debugs("Camera position reseted.\n");
             break;
+        
+        case action::CHANGE_COLOR:
+
+            break;
 
         default:
             break;
@@ -291,7 +319,7 @@ void Bohr::refresh(void) {
 
     switch (this->rmode) {
         case PISURFACE:
-            this->molecule.render_piSurface(this->shaderPiSurf, this->camera, this->scr_width, this->scr_height, this->molrotx, this->molroty);
+            this->molecule.render_piSurface(this->shaderPiSurf, this->camera, this->scr_width, this->scr_height, this->pisurfColor, this->molrotx, this->molroty);
             break;
         case VANDERWALLS:
         default:

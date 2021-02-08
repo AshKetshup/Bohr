@@ -67,14 +67,32 @@ void MarchingCubes::generate(PiSurface p, Point3D min, Point3D max, float maxRad
 
     debugs("\tGot %ld points (i.e. %ld triangles) from %lld cubes.\n", vertices.size(), vertices.size() / 3, c);
 
+    float *v = new float[vertices.size()];
+    float *n = new float[normals.size()];
+
+    int j = 0;
+    for (int i = vertices.size() - 3; i >= 0; i -= 3) {
+        v[j  ] = vertices[i  ];
+        v[j+1] = vertices[i+1];
+        v[j+2] = vertices[i+2];
+        j += 3;
+    }
+    j = 0;
+    for (int i = normals.size() - 3; i >= 0; i -= 3) {
+        n[j  ] = -normals[i  ];
+        n[j+1] = -normals[i+1];
+        n[j+2] = -normals[i+2];
+        j += 3;
+    }
+
     unsigned int handle[2];
     glGenBuffers(2, handle);
 
     glBindBuffer(GL_ARRAY_BUFFER, handle[0]);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &v[0] /*&vertices[0]*/, GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, handle[1]);
-    glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(GLfloat), &normals[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, normals.size()  * sizeof(GLfloat), &n[0] /*&normals[0]*/, GL_STATIC_DRAW);
 
     glGenVertexArrays(1, &vaoHandle);
     glBindVertexArray(vaoHandle);
@@ -88,6 +106,9 @@ void MarchingCubes::generate(PiSurface p, Point3D min, Point3D max, float maxRad
     glVertexAttribPointer((GLuint)1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
     glBindVertexArray(0);
+
+    delete [] v;
+    delete [] n;
 }
 
 
@@ -115,7 +136,7 @@ void MarchingCubes::generate_single(PiSurface surf, Point3D point, float step) {
 
 
     Point3D edgeVert[12];
-    Point3D edgeNorm[12];
+    Vector3D edgeNorm[12];
     GLfloat fOffset; // = step / 2.f;
     for (int edge = 0; edge < 12; edge++) {
         if (edgeFlags & (1 << edge)) {
@@ -123,12 +144,16 @@ void MarchingCubes::generate_single(PiSurface surf, Point3D point, float step) {
             edgeVert[edge].x = (point.x + (a2fVertexOffset[a2iEdgeConnection[edge][0]][0] + fOffset * a2fEdgeDirection[edge][0]) * step);
             edgeVert[edge].y = (point.y + (a2fVertexOffset[a2iEdgeConnection[edge][0]][1] + fOffset * a2fEdgeDirection[edge][1]) * step);
             edgeVert[edge].z = (point.z + (a2fVertexOffset[a2iEdgeConnection[edge][0]][2] + fOffset * a2fEdgeDirection[edge][2]) * step);
-            edgeNorm[edge] = getNormal(surf, edgeVert[edge].x, edgeVert[edge].y, edgeVert[edge].z);
+            edgeNorm[edge] = getNormal(surf, edgeVert[edge].x, edgeVert[edge].y, edgeVert[edge].z, edgeFlags);
         }
     }
 
     GLint ivertex;
+    unsigned short wasZero;
+    Point3D lastVert[3];
+    Vector3D specialNorm;
     for (int t = 0; t < 5; t++) {
+        wasZero = 0;
         if (a2iTriangleConnectionTable[cubeIndex][3*t] < 0)
             break;
         
@@ -137,9 +162,26 @@ void MarchingCubes::generate_single(PiSurface surf, Point3D point, float step) {
             this->vertices.push_back(edgeVert[ivertex].x);
             this->vertices.push_back(edgeVert[ivertex].y);
             this->vertices.push_back(edgeVert[ivertex].z);
+            
+            if (edgeNorm[ivertex] == (Vector3D){0.f, 0.f, 0.f}) {
+                wasZero += 1;
+                lastVert[c] = edgeVert[ivertex];
+            }
+
             this->normals.push_back(edgeNorm[ivertex].x);
             this->normals.push_back(edgeNorm[ivertex].y);
             this->normals.push_back(edgeNorm[ivertex].z);
+        }
+
+        if (wasZero == 3) {
+            for (int c = 0; c < 9; c++)
+                this->normals.pop_back();
+            specialNorm = getNormal(lastVert[0], lastVert[1], lastVert[2]);
+            for (int c = 0; c < 3; c++) {
+                this->normals.push_back(specialNorm.x);
+                this->normals.push_back(specialNorm.y);
+                this->normals.push_back(specialNorm.z);
+            }
         }
     }
 }
@@ -153,12 +195,34 @@ GLfloat MarchingCubes::getOffset(GLfloat fValue1, GLfloat fValue2, GLfloat fValu
 }
 
 
-Point3D MarchingCubes::getNormal(PiSurface& surf, GLfloat x, GLfloat y, GLfloat z) {
-    Point3D rfNormal;
+Vector3D MarchingCubes::getNormal(PiSurface& surf, GLfloat x, GLfloat y, GLfloat z, int edges) {
+    Vector3D rfNormal;
     rfNormal.x = (surf.getValueAt(x-0.01f, y, z) - surf.getValueAt(x+0.01f, y, z));
     rfNormal.y = (surf.getValueAt(x, y-0.01f, z) - surf.getValueAt(x, y+0.01f, z));
     rfNormal.z = (surf.getValueAt(x, y, z-0.01f) - surf.getValueAt(x, y, z+0.01f));
-    // normalizeVector(rfNormal, rfNormal);
+
+    /* if (rfNormal.x == 0.f && rfNormal.y == 0.f && rfNormal.z == 0.f) {
+        if (edges & 0b001100010001) {
+            rfNormal = rfNormal + (Vector3D){0.f, -1.0f, 0.f};
+        }
+        if (edges & 0b011000100010) {
+            rfNormal = rfNormal + (Vector3D){1.f, 0.f, 0.f};
+        }
+        if (edges & 0b110001000100) {
+            rfNormal = rfNormal + (Vector3D){0.f, 1.f, 0.f};
+        }
+        if (edges & 0b100110001000) {
+            rfNormal = rfNormal + (Vector3D){-1.f, 0.f, 0.f};
+        }
+        if (edges & 0b000011110000) {
+            rfNormal = rfNormal + (Vector3D){0.f, 0.f, 1.f};
+        }
+        if (edges & 0b000000001111) {
+            rfNormal = rfNormal + (Vector3D){0.f, 0.f, -1.f};
+        }
+    } */
+
+    normalizeVector(rfNormal, rfNormal);
     return rfNormal;
 }
 
@@ -173,25 +237,19 @@ Vector3D MarchingCubes::getNormal(Point3D p1, Point3D p2, Point3D p3) {
 }
 
 
-GLvoid MarchingCubes::normalizeVector(Point3D &rfVectorResult, Point3D &rfVectorSource) {
+GLvoid MarchingCubes::normalizeVector(Vector3D &rfVectorResult, Vector3D &rfVectorSource) {
     GLfloat fOldLength;
     GLfloat fScale;
 
     fOldLength = sqrtf( (rfVectorSource.x * rfVectorSource.x) +
                         (rfVectorSource.y * rfVectorSource.y) +
                         (rfVectorSource.z * rfVectorSource.z) );
-    
-    // if (rfVectorSource.x == 0.f && rfVectorSource.y == 0.f && rfVectorSource.z == 0.f) {
-    //     debugs("(%6.3f, %6.3f, %6.3f)\toldLength = %f\t", rfVectorSource.x, rfVectorSource.y, rfVectorSource.z, fOldLength);
-    // }
 
     if (fOldLength == 0.0f) {
         rfVectorResult.x = rfVectorSource.x;
         rfVectorResult.y = rfVectorSource.y;
         rfVectorResult.z = rfVectorSource.z;
-        // debugs("Zero\n");
-    }
-    else {
+    } else {
         fScale = 1.0 / fOldLength;
         rfVectorResult.x = rfVectorSource.x * fScale;
         rfVectorResult.y = rfVectorSource.y * fScale;

@@ -25,9 +25,9 @@ private:
     vector<GLfloat> normals;
 
     GLfloat getOffset(GLfloat, GLfloat, GLfloat);
-    Point3D getNormal(PiSurface&, GLfloat, GLfloat, GLfloat);
+    Vector3D getNormal(PiSurface&, GLfloat, GLfloat, GLfloat, int);
     Vector3D getNormal(Point3D, Point3D, Point3D);
-    GLvoid normalizeVector(Point3D&, Point3D&);
+    GLvoid normalizeVector(Vector3D&, Vector3D&);
 
     void generate_single(PiSurface, Point3D, float = 0.2f);
 

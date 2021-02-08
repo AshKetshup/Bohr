@@ -13,6 +13,10 @@ Point3D operator - (Point3D p) {
     return {-p.x, -p.y, -p.z};
 }
 
+bool operator == (Vector3D p1, Vector3D p2) {
+    return (p1.x == p2.x) && (p1.y == p2.y) && (p1.z == p2.z);
+}
+
 Vector3D operator + (Vector3D v, Vector3D w) {
     return {v.x + w.x, v.y + w.y, v.z + w.z};
 }

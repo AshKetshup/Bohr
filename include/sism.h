@@ -62,6 +62,7 @@ namespace structur {
         string shaderDir;
         Shader shaderFont;
         Shader shaderMolecule;
+        Shader shaderPiSurf;
         Shader shaderLogo;
         
         string fontDir;

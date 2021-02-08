@@ -139,8 +139,9 @@ void Molecule::render_piSurface(Shader shader, Camera camera, const int SCR_WIDT
 
     glm::mat4 model = glm::mat4(1.0f);
     // glm::vec3 trans = glm::vec3(0.f);
-    model = glm::rotate(model, glm::radians(rotx), glm::vec3(1.f, 0.f, 0.f));
-    model = glm::rotate(model, glm::radians(roty), glm::vec3(0.f, 1.f, 0.f));
+    model = glm::rotate(model, glm::radians(  0.f + rotx), glm::vec3(1.f, 0.f, 0.f));
+    model = glm::rotate(model, glm::radians(  0.f + roty), glm::vec3(0.f, 1.f, 0.f));
+    // model = glm::rotate(model, glm::radians(180.f       ), glm::vec3(0.f, 0.f, 1.f));
     // model = glm::translate(model, trans);
     model = glm::scale(model, glm::vec3(1.0f));
     shader.setMat4("model", model);

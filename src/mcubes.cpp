@@ -25,9 +25,13 @@ MarchingCubes::MarchingCubes(void) {}
 void MarchingCubes::render() const {
     // glEnable(GL_BLEND);
     // glBlendFunc(GL_ONE, GL_ZERO);
-    // glDepthFunc(GL_NEVER);
+    // glDepthFunc(GL_GREATER);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    
     glBindVertexArray(vaoHandle);
     glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+
+    glDisable(GL_POLYGON_OFFSET_FILL);
     // glDepthFunc(GL_LESS);
     // glBindVertexArray(0);
     // glDisable(GL_BLEND);
@@ -51,9 +55,9 @@ void MarchingCubes::generate(PiSurface p, Point3D min, Point3D max, float maxRad
     debugs("\tz = %.2lf to %.2lf step %.2f\n", floor1(min.z - maxRadius), ceil1(max.z + maxRadius), step);
 
     unsigned long long c = 0;
-    for (float x = floor1(min.x - maxRadius); x < ceil1(max.x + maxRadius); x += step) {
-        for (float y = floor1(min.y - maxRadius); y < ceil1(max.y + maxRadius); y += step) {
-            for (float z = floor1(min.z - maxRadius); z < ceil1(max.z + maxRadius); z += step) {
+    for (float z = floor1(min.z - maxRadius); z < ceil1(max.z + maxRadius); z += step) {
+        for (float x = floor1(min.x - maxRadius); x < ceil1(max.x + maxRadius); x += step) {
+            for (float y = floor1(min.y - maxRadius); y < ceil1(max.y + maxRadius); y += step) {
                 this->generate_single(p, {x, y, z}, step);
                 c++;
             }
@@ -88,6 +92,8 @@ void MarchingCubes::generate(PiSurface p, Point3D min, Point3D max, float maxRad
 
 
 void MarchingCubes::generate_single(PiSurface surf, Point3D point, float step) {
+    float w = surf.getBlendingParam();
+    
     Grid grid[8];
     for (int i = 0; i < 8; i++) {
         grid[i].point = {
@@ -99,7 +105,6 @@ void MarchingCubes::generate_single(PiSurface surf, Point3D point, float step) {
     }
 
     GLint cubeIndex = 0b00000000;
-    float w = surf.getBlendingParam();
     for (int i = 0; i < 8; i++) {
         if (grid[i].val <= w)
             cubeIndex |= 1 << i;
@@ -111,13 +116,13 @@ void MarchingCubes::generate_single(PiSurface surf, Point3D point, float step) {
 
     Point3D edgeVert[12];
     Point3D edgeNorm[12];
-    GLfloat fOffset = step / 2.f;
+    GLfloat fOffset; // = step / 2.f;
     for (int edge = 0; edge < 12; edge++) {
         if (edgeFlags & (1 << edge)) {
             fOffset = getOffset(grid[a2iEdgeConnection[edge][0]].val, grid[a2iEdgeConnection[edge][1]].val, w);
-            edgeVert[edge].x = point.x + (a2fVertexOffset[a2iEdgeConnection[edge][0]][0] + fOffset * a2fEdgeDirection[edge][0]) * step;
-            edgeVert[edge].y = point.y + (a2fVertexOffset[a2iEdgeConnection[edge][0]][1] + fOffset * a2fEdgeDirection[edge][1]) * step;
-            edgeVert[edge].z = point.z + (a2fVertexOffset[a2iEdgeConnection[edge][0]][2] + fOffset * a2fEdgeDirection[edge][2]) * step;
+            edgeVert[edge].x = (point.x + (a2fVertexOffset[a2iEdgeConnection[edge][0]][0] + fOffset * a2fEdgeDirection[edge][0]) * step);
+            edgeVert[edge].y = (point.y + (a2fVertexOffset[a2iEdgeConnection[edge][0]][1] + fOffset * a2fEdgeDirection[edge][1]) * step);
+            edgeVert[edge].z = (point.z + (a2fVertexOffset[a2iEdgeConnection[edge][0]][2] + fOffset * a2fEdgeDirection[edge][2]) * step);
             edgeNorm[edge] = getNormal(surf, edgeVert[edge].x, edgeVert[edge].y, edgeVert[edge].z);
         }
     }
@@ -149,11 +154,11 @@ GLfloat MarchingCubes::getOffset(GLfloat fValue1, GLfloat fValue2, GLfloat fValu
 
 
 Point3D MarchingCubes::getNormal(PiSurface& surf, GLfloat x, GLfloat y, GLfloat z) {
-    Point3D rfNormal = {-0.1f, 0.1f, 0.0f};
-    rfNormal.x = surf.getValueAt(x-0.01f, y, z) - surf.getValueAt(x+0.01f, y, z);
-    rfNormal.y = surf.getValueAt(x, y-0.01f, z) - surf.getValueAt(x, y+0.01f, z);
-    rfNormal.z = surf.getValueAt(x, y, z-0.01f) - surf.getValueAt(x, y, z+0.01f);
-    normalizeVector(rfNormal, rfNormal);
+    Point3D rfNormal;
+    rfNormal.x = (surf.getValueAt(x-0.01f, y, z) - surf.getValueAt(x+0.01f, y, z));
+    rfNormal.y = (surf.getValueAt(x, y-0.01f, z) - surf.getValueAt(x, y+0.01f, z));
+    rfNormal.z = (surf.getValueAt(x, y, z-0.01f) - surf.getValueAt(x, y, z+0.01f));
+    // normalizeVector(rfNormal, rfNormal);
     return rfNormal;
 }
 
@@ -175,11 +180,16 @@ GLvoid MarchingCubes::normalizeVector(Point3D &rfVectorResult, Point3D &rfVector
     fOldLength = sqrtf( (rfVectorSource.x * rfVectorSource.x) +
                         (rfVectorSource.y * rfVectorSource.y) +
                         (rfVectorSource.z * rfVectorSource.z) );
+    
+    // if (rfVectorSource.x == 0.f && rfVectorSource.y == 0.f && rfVectorSource.z == 0.f) {
+    //     debugs("(%6.3f, %6.3f, %6.3f)\toldLength = %f\t", rfVectorSource.x, rfVectorSource.y, rfVectorSource.z, fOldLength);
+    // }
 
     if (fOldLength == 0.0f) {
         rfVectorResult.x = rfVectorSource.x;
         rfVectorResult.y = rfVectorSource.y;
         rfVectorResult.z = rfVectorSource.z;
+        // debugs("Zero\n");
     }
     else {
         fScale = 1.0 / fOldLength;

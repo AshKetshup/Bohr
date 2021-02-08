@@ -146,6 +146,8 @@ const char logo_fragment_shader[] =
 
 #define MOLECULE_FS "lighting_fs.glsl"      // Molecule fragment shader file name
 #define MOLECULE_VS "lighting_vs.glsl"      // Molecule vertex shader file name
+#define PISURF_FS   "pisurf_fs.glsl"        // Pi Surface fragment shader file name
+#define PISURF_VS   "pisurf_vs.glsl"        // Pi Surface vertex shader file name
 #define FONT_FS     "font_fs.glsl"          // Font fragment shader file name
 #define FONT_VS     "font_vs.glsl"          // Font vertex shader file name
 #define LOGO_FS     "logo_fs.glsl"          // Logo fragment shader file name

@@ -11,7 +11,7 @@ using namespace std;
 class MarchingCubes {
 public:
     MarchingCubes();
-    void generate(PiSurface, Point3D, Point3D, float = 3.43f);
+    void generate(PiSurface, Point3D, Point3D, float = 3.50f);
     void render() const;
 
 private:

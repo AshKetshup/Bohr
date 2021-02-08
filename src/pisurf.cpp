@@ -9,6 +9,10 @@ Vector3D operator - (Point3D p1, Point3D p2) {
     return {p2.x - p1.x, p2.y - p1.y, p2.z - p1.z};
 }
 
+Point3D operator - (Point3D p) {
+    return {-p.x, -p.y, -p.z};
+}
+
 Vector3D operator + (Vector3D v, Vector3D w) {
     return {v.x + w.x, v.y + w.y, v.z + w.z};
 }

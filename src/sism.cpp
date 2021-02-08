@@ -289,7 +289,7 @@ void Bohr::refresh(void) {
 
     switch (this->rmode) {
         case PISURFACE:
-            this->molecule.render_piSurface(this->shaderMolecule, this->camera, this->scr_width, this->scr_height, this->molrotx, this->molroty);
+            this->molecule.render_piSurface(this->shaderPiSurf, this->camera, this->scr_width, this->scr_height, this->molrotx, this->molroty);
             break;
         case VANDERWALLS:
         default:
@@ -343,6 +343,10 @@ Bohr::Bohr(const unsigned int width, const unsigned int height) {
         this->shaderMolecule = Shader((this->shaderDir + "/" + MOLECULE_VS).c_str(), (this->shaderDir + "/" + MOLECULE_FS).c_str());
         if (!this->shaderMolecule.wasSuccessful())
             throw BohrException("Molecule: " + this->shaderMolecule.getReport());
+        
+        this->shaderPiSurf   = Shader((this->shaderDir + "/" + PISURF_VS).c_str(), (this->shaderDir + "/" + PISURF_FS).c_str());
+        if (!this->shaderPiSurf.wasSuccessful())
+            throw BohrException("Pi Surface: " + this->shaderPiSurf.getReport());
         
         this->shaderFont     = Shader((this->shaderDir + "/" + FONT_VS).c_str(), (this->shaderDir + "/" + FONT_FS).c_str());
         if (!this->shaderFont.wasSuccessful())

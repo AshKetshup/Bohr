@@ -17,7 +17,18 @@ const unsigned int SCR_HEIGHT = 900;
 using namespace structur;
 
 int main(int argc, char const *argv[]) {
-    Bohr bohr(SCR_WIDTH, SCR_HEIGHT);
+    unsigned int width;
+    unsigned int height;
+
+    try {
+        width  = std::stoi(argv[1]);
+        height = std::stoi(argv[2]);
+    } catch (...) {
+        width  = SCR_WIDTH;
+        height = SCR_HEIGHT;
+    }
+
+    Bohr bohr(width, height);
     if (!bohr.launchSuccessful())
         return -1;
     bohr.main();

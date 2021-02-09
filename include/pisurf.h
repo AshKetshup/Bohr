@@ -14,8 +14,8 @@ typedef struct {
 } Vector3D;
 
 Vector3D operator - (Point3D, Point3D);
-Point3D operator - (Point3D);
-bool operator == (Vector3D, Vector3D);
+Point3D  operator - (Point3D);
+bool     operator == (Vector3D, Vector3D);
 Vector3D operator + (Vector3D, Vector3D);
 Vector3D operator - (Vector3D);
 Vector3D operator - (Vector3D, Vector3D);

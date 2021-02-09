@@ -288,13 +288,13 @@ void Bohr::refresh(void) {
     this->deltaTime = this->currentFrame - this->lastFrame;
     this->lastFrame = this->currentFrame;
 
-    if (this->logo.isAvailable() && this->fname.empty()) {
-        this->logo.render(this->scr_width, this->scr_height);
-    }
-
     writeInstructions(this->getTextRenderer(), 10.f, 10.f, 0.6f);
     writeAuthors(this->getTextRenderer(), 1470.f, this->scr_height - 2.f * this->getTextRenderer().getFontSize(), 0.75f);
     writeText(this->getTextRenderer(), !this->fname.empty() ? std::experimental::filesystem::path(this->fname).filename() : "No file opened", 10.f, this->scr_height - this->getTextRenderer().getFontSize(), 0.8f);
+
+    if (this->logo.isAvailable() && this->fname.empty()) {
+        this->logo.render(this->scr_width, this->scr_height);
+    }
 
     switch (this->processInput()) {
         case action::OPEN_FILE:

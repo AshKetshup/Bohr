@@ -49,8 +49,8 @@ bool Sphere::pointInside(float x, float y, float z) {
     return this->pointInside({x, y, z});
 }
 
-bool Sphere::pointInside(Point3D p) {
-    return this->getValueAt(p) <= sqr(this->r);
+bool Sphere::pointInside(Point3D p, float offset) {
+    return this->getValueAt(p) <= sqr(this->r + offset);
 }
 
 bool Sphere::pointInCube(float x, float y, float z) {
@@ -92,17 +92,22 @@ void PiSurface::addSphere(Sphere s) {
 }
 
 float PiSurface::getValueAt(float x, float y, float z, float padding) {
-    return this->getValueAt({x, y, z}, padding);
+    return this->getValueAt({x, y, z} /*, padding*/);
 }
 
-float PiSurface::getValueAt(Point3D p, float padding) {
+float PiSurface::getValueAt(Point3D p, bool *isblob, float padding) {
+    unsigned count = 0;
     float res = 1.f;
     for (auto s : this->spheres) {
         if (s.pointInCube(p)) {
-            res *= s.getValueAt(p) - sqr(s.getRadius());
+            float here = s.getValueAt(p) - sqr(s.getRadius());
+            res *= here;
+            if (here < -w/2.f && s.pointInside(p, this->w)) count++;
         }
     }
-    return res; // - this->w;
+    if (isblob != NULL) *isblob = (count % 2 == 0 && count > 0);
+    return res;
+    // return (res * ((count % 2 == 0 && count > 0) ? -1.f : 1.f)); // - this->w;
 }
 
 bool PiSurface::pointInside(float x, float y, float z) {

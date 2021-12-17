@@ -119,6 +119,7 @@ void MarchingCubes::generate(PiSurface p, Point3D min, Point3D max, float maxRad
     float *v = new float[vertices.size()];
     float *n = new float[normals.size()];
 
+    /*
     int j = 0;
     for (int i = vertices.size() - 3; i >= 0; i -= 3) {
         v[j  ] = vertices[i  ];
@@ -133,15 +134,16 @@ void MarchingCubes::generate(PiSurface p, Point3D min, Point3D max, float maxRad
         n[j+2] = -normals[i+2];
         j += 3;
     }
+    */
 
     unsigned int handle[2];
     glGenBuffers(2, handle);
 
     glBindBuffer(GL_ARRAY_BUFFER, handle[0]);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &v[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data() /*&v[0]*/, GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, handle[1]);
-    glBufferData(GL_ARRAY_BUFFER, normals.size()  * sizeof(GLfloat), &n[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, normals.size()  * sizeof(GLfloat), normals.data() /*&n[0]*/, GL_STATIC_DRAW);
 
     glGenVertexArrays(1, &vaoHandle);
     glBindVertexArray(vaoHandle);
@@ -165,14 +167,19 @@ void MarchingCubes::generate_single(vector<GLfloat> &v, vector<GLfloat> &n, PiSu
     float w = surf.getBlendingParam();
     
     Grid grid[8];
+    bool isblob = false, temp = false;
     for (int i = 0; i < 8; i++) {
         grid[i].point = {
             point.x + step * a2fVertexOffset[i][0],
             point.y + step * a2fVertexOffset[i][1],
             point.z + step * a2fVertexOffset[i][2],
         };
-        grid[i].val = surf.getValueAt(grid[i].point);
+        grid[i].val = surf.getValueAt(grid[i].point, &temp);
+        if (temp) isblob = true;
     }
+    if (isblob)
+        for (int i = 0; i < 8; i++)
+            grid[i].val = w+1.f; //fabs(grid[i].val);
 
     GLint cubeIndex = 0b00000000;
     for (int i = 0; i < 8; i++) {

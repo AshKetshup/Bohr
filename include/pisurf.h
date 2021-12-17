@@ -32,7 +32,7 @@ public:
     float getValueAt(float, float, float);
     float getValueAt(Point3D);
     bool pointInside(float, float, float);
-    bool pointInside(Point3D);
+    bool pointInside(Point3D, float = 0.f);
     bool pointInCube(float, float, float);
     bool pointInCube(Point3D);
 };
@@ -49,7 +49,7 @@ public:
     void setBlendingParam(float);
     void addSphere(Sphere);
     float getValueAt(float, float, float, float = 0.f);
-    float getValueAt(Point3D, float = 0.f);
+    float getValueAt(Point3D, bool* = NULL, float = 0.f);
     bool pointInside(float, float, float);
     bool pointInside(Point3D);
 };

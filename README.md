@@ -169,7 +169,7 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for instructions.
 
 ## 📚 License & Citations
 
-Distributed under the [MIT License](./LICENSE.md).
+Distributed under the [GPL-3.0 License](./LICENSE.md).
 
 If you use this work, please cite the algorithmic basis:
 ```

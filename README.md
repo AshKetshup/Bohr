@@ -3,7 +3,7 @@
 [![License: GPL](https://img.shields.io/badge/License-GPL-yellow.svg)](./LICENSE.md)
 [![build](https://img.shields.io/badge/build-passing-brightgreen)]()
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-blue)
-![OpenGL](https://img.shields.io/badge/OpenGL-3.x-brightgreen)
+![OpenGL](https://img.shields.io/badge/OpenGL-4.6-brightgreen)
 ![Linux](https://img.shields.io/badge/platform-Linux-blue?logo=linux)
 
 </div>
@@ -63,24 +63,17 @@ Chemical and biological processes are intimately linked with molecular shapes an
 > “Pi-surfaces: products of implicit surfaces towards constructive composition of 3D objects.”  
 > [arXiv:1906.06751 [cs.GR]](https://arxiv.org/abs/1906.06751)
 
-*(Expand here based on your PDF: objectives, real use cases, educational impact, etc. Paste in your specific intro/justification if you want.)*
-
 ---
 
 ## 🏗️ Implementation & Architecture
 
 Bohr is composed of the following modules:
 
-- **PDB Parser** (`src/pdb/`): Extracts atomic coordinates, radii, and element info from Protein Data Bank files.
-- **Surface Generator** (`src/core/`): Implements the Marching Cubes algorithm; multi-threaded for large molecules.
-- **Renderer** (`src/opengl/`): Uses Modern OpenGL (GLEW, GLFW) for fast isosurface rendering, supporting camera controls and shading.
-- **UI Layer**: (optional) Handles window system, user input, and visual overlays.
+- **PDB Parser** ([`src/pdbreader.cpp`](src/pdbreader.cpp) & [`include/pdbreader.h`](include/pdbreader.h)): Extracts atomic coordinates, radii, and element info from Protein Data Bank files.
+- **Surface Generator** ([`src/pisurf.cpp`](src/pisurf.cpp) & [`src/pisurf.h`](src/pisurf.h)): Implements the Marching Cubes algorithm; multi-threaded for large molecules.
 
 **Key Libraries**  
-GLEW, GLFW3, FreeType, POSIX threads, X11/XRandR (for Linux builds)
-
-*(Expand here with architecture diagrams, data flow, or unique implementation details from your pdf. You can also add benchmarks, e.g., fps for typical molecules, memory profiling, or optimization tricks.)*
-
+GLEW, GLFW3, FreeType, OSDialog
 ---
 
 ## 📸 Screenshots / Results
@@ -106,11 +99,11 @@ make release     # or: make debug
 |------------|-------------------|
 | g++        | 7.0+ (C++17)      |
 | make       | UNIX standard     |
-| OpenGL     | 3.x+              |
+| OpenGL     | 4.6               |
 | GLEW       | Development libs  |
 | GLFW3      | Development libs  |
 | FreeType   | Development libs  |
-| X11/XRandR | Linux/Xorg only   |
+| OSDialog   | Development libs  |
 
 ---
 
@@ -123,7 +116,6 @@ make release     # or: make debug
 **Command-line options**:
 - `-h` / `--help`: Show usage.
 - `--threads N`: Specify thread count.
-- *(Add/describe all CLI arguments supported as per your report.)*
 
 ---
 

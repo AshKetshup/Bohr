@@ -1,10 +1,20 @@
-# Bohr: High-Performance Real-Time Molecular Surface Renderer
+<div align="center">
 
 [![License: GPL](https://img.shields.io/badge/License-GPL-yellow.svg)](./LICENSE.md)
 [![build](https://img.shields.io/badge/build-passing-brightgreen)]()
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-blue)
 ![OpenGL](https://img.shields.io/badge/OpenGL-3.x-brightgreen)
 ![Linux](https://img.shields.io/badge/platform-Linux-blue?logo=linux)
+
+</div>
+
+<div align="center">
+  <img src="doc/img/LogoBohr.png" alt="Bohr Logo" width="300"/>
+  <h3>Bohr</h3>
+  <p>High-Performance Real-Time Molecular Surface Renderer</p>
+</div>
+
+  
 
 ---
 
@@ -75,12 +85,7 @@ GLEW, GLFW3, FreeType, POSIX threads, X11/XRandR (for Linux builds)
 
 ## 📸 Screenshots / Results
 
-> *Please add/render some sample images here!*
-> 
-> ![Rendering Example](doc/screenshots/bohr_sample1.png)
-> ![Another Example](doc/screenshots/bohr_sample2.png)
->
-> *(Or paste benchmark/visualization results, "Figure 1" or result images from your PDF if available.)*
+![Rendering Example](doc/img/bohr-main.png)
 
 ---
 
@@ -125,7 +130,7 @@ make release     # or: make debug
 ## 📖 Documentation
 
 - Core source: [`src/`](./src)
-- Documentation: [`docs/`](./docs)
+- Documentation: [`doc/`](./doc)
 
 ---
 
